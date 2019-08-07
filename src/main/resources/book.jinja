@@ -8,12 +8,14 @@
 <body>
 {% set navPointId = [True] -%}
 {% for section, articles in sections.items() -%}
-    <h1>{{ section }}</h1>
-    <mbp:pagebreak />
+    {% if section != 'HIDDEN' -%}
+        <h1>{{ section }}</h1>
+    {% endif -%}
+    <mbp:pagebreak/>
     {% for article in articles -%}
         {% if navPointId.append(True) -%}dummy{% endif -%}
         <h3 itemprop="alternativeHeadline">{{ article['subheadline'] }}</h3>
-        <a name="article_{{ navPointId|length }}"><h2 itemprop="headline">{{ article['title'] }}</h2></a>
+        <a name="article_{{ navPointId|length }}"><h2 style="margin: 1.5em;" itemprop="headline">{{ article['title'] }}</h2></a>
         {% if article['image'] -%}
             <img src="{{ article['image'] }}" alt=""/>
         {% endif -%}
@@ -21,7 +23,7 @@
             <p style="margin: 1.5em;"><i>{{ article['description'] }}</i></p>
         {% endif -%}
         {{ article['text'] }}
-        <mbp:pagebreak />
+        <mbp:pagebreak/>
     {% endfor -%}
 {% endfor -%}
 </body>
