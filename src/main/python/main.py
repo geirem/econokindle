@@ -93,13 +93,13 @@ def main():
         section = article['section']
         if section == 'The world this week' or section == 'Economic and financial indicators':
             continue
-        article_count += 1
-        article['id'] = 'article_' + str(article_count)
         if section not in sections:
             sections[section] = {
                 'articles': [],
                 'id': 'section_' + str(len(sections)),
             }
+        article_count += 1
+        article['id'] = 'article_' + str(article_count)
         sections[section]['articles'].append(article)
     for image in images:
         fetcher.fetch_image(image)

@@ -6,8 +6,9 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<mbp:pagebreak/>
 {% for section_name, section in sections.items() -%}
-    <a name="{{ section['id']}}"><h1>{{ section_name }}</h1></a>
+    <a name="{{ section['id'] }}"><h1>{{ section_name }}</h1></a>
     <ul>
         {% for article in section['articles'] -%}
             <li><a href="#{{ article['id'] }}">{{ article['title'] }}</a></li>
@@ -16,7 +17,7 @@
     <mbp:pagebreak/>
     {% for article in section['articles'] -%}
         <a name="{{ article['id'] }}"><h3 itemprop="alternativeHeadline">{{ article['subheadline'] }}</h3></a>
-        <h2 style="margin: 1.5em;" itemprop="headline">{{ article['title'] }}</h2>
+        <h1 itemprop="headline">{{ article['title'] }}</h1>
         {% if article['image'] -%}
             <img src="{{ article['image'] }}" alt=""/>
         {% endif -%}

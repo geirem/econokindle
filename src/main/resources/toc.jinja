@@ -8,7 +8,7 @@
 <body>
 <div id="toc">
     {% for section_name, section in sections.items() -%}
-        <a name="#{{ section['id'] }}"><h2>{{ section_name }}/></h2></a>
+        <a href="economist.html#{{ section['id'] }}"><h2>{{ section_name }}</h2></a>
         <ul>
         {% for article in section['articles'] -%}
             <li><div><a href="economist.html#{{ article['id'] }}">{{ article['title'] }}</a></div></li>
