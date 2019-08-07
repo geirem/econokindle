@@ -1,5 +1,4 @@
 from typing import Optional
-
 from lib.parsers.Parser import Parser
 
 
@@ -14,12 +13,12 @@ class CartoonParser(Parser):
     def parse(self):
         image = self._script['mainImageObj']['path']
         self._images.append(self._script['mainImageObj']['path'])
-        html = '<p><img alt="" src="' + image.split('/').pop() + '"/></p>'
         return {
             'title': Parser._apply_html_entities(self._script['title']),
-            'text': html,
-            'section': Parser._apply_html_entities(''),
-            'flytitle': Parser._apply_html_entities(''),
+            'text': '<p><img alt="" src="' + image.split('/').pop() + '"/></p>',
+            'section': 'HIDDEN',
+            'flytitle': '',
+            'headline': '',
         }
 
     @staticmethod

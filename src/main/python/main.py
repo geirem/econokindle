@@ -16,6 +16,7 @@ from lib.parsers.CanonicalParser import CanonicalParser
 from lib.parsers.CartoonParser import CartoonParser
 from lib.parsers.ContentParser import ContentParser
 from lib.parsers.NullParser import NullParser
+from collections import OrderedDict
 
 WORK = './cache/'
 RESOURCES = 'src/main/resources'
@@ -64,7 +65,9 @@ def main():
     root = fetcher.fetch('https://www.economist.com/printedition/' + edition)
     raw_articles = parse_root(root)
     images = []
-    sections = {}
+    sections = OrderedDict()
+    sections['HIDDEN'] = []
+    sections['Leaders'] = []
     for article in raw_articles:
         url = article['url']['canonical']
         if not article_filter(url):
@@ -97,7 +100,7 @@ def main():
     copyfile(WORK + 'economist.mobi', 'economist.mobi')
 
 
-def render(template: str, file: str, sections: dict, title: str) -> None:
+def render(template: str, file: str, sections: OrderedDict, title: str) -> None:
     content = env.get_template(template).render(sections=sections, title=title)
     with open(WORK + file, 'wt') as writer:
         writer.write(content)
