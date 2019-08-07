@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE ncx PUBLIC "-//NISO//DTD ncx 2005-1//EN"
-"http://www.daisy.org/z3986/2005/ncx-2005-1.dtd">
+        "http://www.daisy.org/z3986/2005/ncx-2005-1.dtd">
 <ncx version="2005-1" xml:lang="en" xmlns="http://www.daisy.org/z3986/2005/ncx/">
     <head>
         <!-- The following four metadata items are required for all NCX documents,
@@ -18,20 +18,29 @@
     </docAuthor>
     <navMap>
         <navPoint class="toc" id="table" playOrder="1">
-            <navLabel><text>Table of Contents</text></navLabel>
-            <content src="toc.html" />
+            <navLabel>
+                <text>Table of Contents</text>
+            </navLabel>
+            <content src="toc.html"/>
         </navPoint>
         {% set navPointId = [True] -%}
-        {% for section, articles in sections.items() -%}
-                {% for article in articles -%}
-                    {% if navPointId.append(True) -%}dummy{% endif -%}
-                    <navPoint id="navPoint-{{ navPointId|length }}" playOrder="{{ navPointId|length }}">
-                        <navLabel>
-                            <text>{{ article['title'] }}</text>
-                        </navLabel>
-                        <content src="economist.html#article_{{ navPointId|length }}"/>
-                    </navPoint>
-                {% endfor -%}
+        {% for section_name, section in sections.items() -%}
+            {% if navPointId.append(True) -%}{% endif -%}
+            <navPoint id="navPoint-{{ navPointId|length }}" playOrder="{{ navPointId|length }}">
+                <navLabel>
+                    <text>Section: {{ section_name }}</text>
+                </navLabel>
+                <content src="economist.html#{{ section['id'] }}"/>
+            </navPoint>
+            {% for article in section['articles'] -%}
+                {% if navPointId.append(True) -%}{% endif -%}
+                <navPoint id="navPoint-{{ navPointId|length }}" playOrder="{{ navPointId|length }}">
+                    <navLabel>
+                        <text>&nbsp;&nbsp;{{ article['title'] }}</text>
+                    </navLabel>
+                    <content src="economist.html#{{ article['id'] }}"/>
+                </navPoint>
+            {% endfor -%}
         {% endfor -%}
     </navMap>
 </ncx>

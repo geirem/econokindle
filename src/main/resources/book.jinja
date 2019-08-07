@@ -6,16 +6,17 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-{% set navPointId = [True] -%}
-{% for section, articles in sections.items() -%}
-    {% if section != 'HIDDEN' -%}
-        <h1>{{ section }}</h1>
-    {% endif -%}
+{% for section_name, section in sections.items() -%}
+    <a name="{{ section['id']}}"><h1>{{ section_name }}</h1></a>
+    <ul>
+        {% for article in section['articles'] -%}
+            <li><a href="#{{ article['id'] }}">{{ article['title'] }}</a></li>
+        {% endfor -%}
+    </ul>
     <mbp:pagebreak/>
-    {% for article in articles -%}
-        {% if navPointId.append(True) -%}dummy{% endif -%}
-        <h3 itemprop="alternativeHeadline">{{ article['subheadline'] }}</h3>
-        <a name="article_{{ navPointId|length }}"><h2 style="margin: 1.5em;" itemprop="headline">{{ article['title'] }}</h2></a>
+    {% for article in section['articles'] -%}
+        <a name="{{ article['id'] }}"><h3 itemprop="alternativeHeadline">{{ article['subheadline'] }}</h3></a>
+        <h2 style="margin: 1.5em;" itemprop="headline">{{ article['title'] }}</h2>
         {% if article['image'] -%}
             <img src="{{ article['image'] }}" alt=""/>
         {% endif -%}

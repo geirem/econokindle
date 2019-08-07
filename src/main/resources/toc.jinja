@@ -7,13 +7,11 @@
 </head>
 <body>
 <div id="toc">
-    {% set navPointId = [True] -%}
-    {% for section, articles in sections.items() -%}
-        <h2>{{ articles[0]['section'] }}</h2>
+    {% for section_name, section in sections.items() -%}
+        <a name="#{{ section['id'] }}"><h2>{{ section_name }}/></h2></a>
         <ul>
-        {% for article in articles -%}
-            {% if navPointId.append(True) -%}dummy{% endif -%}
-            <li><div><a href="economist.html#article_{{ navPointId|length }}">{{ article['title'] }}</a></div></li>
+        {% for article in section['articles'] -%}
+            <li><div><a href="economist.html#{{ article['id'] }}">{{ article['title'] }}</a></div></li>
         {% endfor -%}
         </ul>
     {% endfor -%}

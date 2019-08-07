@@ -66,10 +66,17 @@ def main():
     raw_articles = parse_root(root)
     images = []
     sections = OrderedDict()
-    sections['HIDDEN'] = []
-    sections['Leaders'] = []
-    for article in raw_articles:
-        url = article['url']['canonical']
+    sections['The World Today'] = {
+        'articles': [],
+        'id': 'section_1',
+    }
+    sections['Leaders'] = {
+        'articles': [],
+        'id': 'section_2',
+    }
+    article_count = 0
+    for raw_article in raw_articles:
+        url = raw_article['url']['canonical']
         if not article_filter(url):
             continue
         document = fetcher.fetch(url)
@@ -78,17 +85,22 @@ def main():
             print('No script: ' + url)
             continue
         parser = parsing_strategy(script, images, url)
-        content = parser.parse()
-        if content == {} or content is None:
+        article = parser.parse()
+        if article == {} or article is None:
             print('Script not parsable: ' + url)
             print(parser)
             continue
-        section = content['section']
+        section = article['section']
         if section == 'The world this week' or section == 'Economic and financial indicators':
             continue
+        article_count += 1
+        article['id'] = 'article_' + str(article_count)
         if section not in sections:
-            sections[section] = []
-        sections[section].append(content)
+            sections[section] = {
+                'articles': [],
+                'id': 'section_' + str(len(sections)),
+            }
+        sections[section]['articles'].append(article)
     for image in images:
         fetcher.fetch_image(image)
     render('toc.jinja', 'toc.html', sections, 'The Economist ' + edition)
