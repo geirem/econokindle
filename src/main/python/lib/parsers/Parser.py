@@ -32,23 +32,11 @@ class Parser:
                 result += item['data']
             except:
                 pass
-            if type(item) is str:
-                result += item
-                continue
-            if 'type' not in item:
-                continue
             if item['type'] not in ['tag', 'html-tag']:
                 continue
-            tag_name = 'tagname'
-            attribute_name = 'attributes'
-            if item['type'] == 'tag':
-                tag_name = 'name'
-                attribute_name = 'attribs'
-            tag = item[tag_name]
+            tag = item['name']
             if tag == 'img':
-                attributes = item[attribute_name]
-                if 'src' not in attributes:
-                    continue
+                attributes = item['attribs']
                 src = attributes['src']
                 name = src.split('/').pop()
                 images.append(src)
@@ -57,8 +45,6 @@ class Parser:
             children = item['children']
             if tag == 'span':
                 result += self._parse_html(children, images)
-                continue
-            if tag == 'iframe':
                 continue
             result += '<' + tag + '>' + self._parse_html(children, images) + '</' + tag + '>'
         return result

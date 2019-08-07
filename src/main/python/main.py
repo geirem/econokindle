@@ -1,22 +1,19 @@
 import json
 import re
-from typing import Optional
-from shutil import copyfile
 import subprocess
+from collections import OrderedDict
+from shutil import copyfile
+from typing import Optional
 
-import urllib3
 import certifi
+import urllib3
+from jinja2 import Environment, FileSystemLoader
 
 from lib.Cache import Cache
 from lib.Fetcher import Fetcher
-from jinja2 import Environment, FileSystemLoader
-
-from lib.parsers.Parser import Parser
 from lib.parsers.CanonicalParser import CanonicalParser
 from lib.parsers.CartoonParser import CartoonParser
-from lib.parsers.ContentParser import ContentParser
-from lib.parsers.NullParser import NullParser
-from collections import OrderedDict
+from lib.parsers.Parser import Parser
 
 WORK = './cache/'
 RESOURCES = 'src/main/resources'
@@ -26,14 +23,6 @@ cache = Cache(WORK)
 fetcher = Fetcher(pool_manager, cache)
 file_loader = FileSystemLoader(RESOURCES)
 env = Environment(loader=file_loader)
-re.DOTALL = True
-
-
-ARTICLE_FILTER = [
-    'politics-this-week',
-    'business-this-week',
-    'economic-data-commodities-and-markets',
-]
 
 
 def parse_root(document: str) -> list:
@@ -46,14 +35,15 @@ def extract_script(document: str) -> Optional[dict]:
     script = re.findall('<script id="preloadedData" type="application/json">.+?</script>', document.replace('\n', ''))
     script = script.pop().replace('<script id="preloadedData" type="application/json">', '')
     script = script.replace('</script>', '')
-    try:
-        return json.loads(script)
-    except:
-        return None
+    return json.loads(script)
 
 
 def article_filter(url: str) -> bool:
-    if url.split('/').pop() in ARTICLE_FILTER:
+    if url.split('/').pop() in [
+        'politics-this-week',
+        'business-this-week',
+        'economic-data-commodities-and-markets',
+    ]:
         return False
     if url.split('/')[3] in ['letters', 'graphic-detail']:
         return False
@@ -81,18 +71,9 @@ def main():
             continue
         document = fetcher.fetch(url)
         script = extract_script(document)
-        if script is None:
-            print('No script: ' + url)
-            continue
         parser = parsing_strategy(script, images, url)
         article = parser.parse()
-        if article == {} or article is None:
-            print('Script not parsable: ' + url)
-            print(parser)
-            continue
         section = article['section']
-        if section == 'The world this week' or section == 'Economic and financial indicators':
-            continue
         if section not in sections:
             sections[section] = {
                 'articles': [],
@@ -122,12 +103,7 @@ def parsing_strategy(script: dict, images: list, url: str) -> Parser:
     if url.endswith('kals-cartoon'):
         return CartoonParser(CartoonParser.wants(script), images)
     content = CanonicalParser.wants(script)
-    if content:
-        return CanonicalParser(content, images)
-    content = ContentParser.wants(script)
-    if content:
-        return ContentParser(content, images)
-    return NullParser(script, images)
+    return CanonicalParser(content, images)
 
 
 main()

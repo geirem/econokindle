@@ -17,13 +17,11 @@ class CanonicalParser(Parser):
                 if 'url' in self._script['image']['main']:
                     if 'canonical' in self._script['image']['main']['url']:
                         return self._script['image']['main']['url']['canonical']
-        return None
 
     def __find_text_data(self) -> Optional[str]:
         for item in self._script:
             if item.startswith('_text'):
                 return item
-        return None
 
     def parse(self) -> dict:
         image = self.__extract_main_image()
