@@ -1,0 +1,8 @@
+/work
+/cache/
+*.mobi
+*.html
+.idea
+*.iml
+.DS_Store
+__pycache__

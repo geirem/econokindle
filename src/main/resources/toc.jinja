@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+<head>
+    <title>Table of Contents</title>
+    <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="toc">
+    {% set navPointId = [True] -%}
+    {% for section, articles in sections.items() -%}
+        <h2>{{ articles[0]['section'] }}</h2>
+        <ul>
+        {% for article in articles -%}
+            {% if navPointId.append(True) -%}dummy{% endif -%}
+            <li><div><a href="economist.html#article_{{ navPointId|length }}">{{ article['title'] }}</a></div></li>
+        {% endfor -%}
+        </ul>
+    {% endfor -%}
+</div>
+</body>
+</html>
