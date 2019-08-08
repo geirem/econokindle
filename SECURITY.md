@@ -1,0 +1,1 @@
+dependency-check -d $(pwd)/owasp -c 2 --project EconoKindle -s . --enableExperimental --cveUrl12Modified=http://localhost:8080/nvdcve-modified.xml.gz --cveUrl20Modified=http://localhost:8080/nvdcve-2.0-modified.xml.gz --cveUrl12Base=http://localhost:8080/nvdcve-%d.xml.gz --cveUrl20Base=http://localhost:8080/nvdcve-2.0-%d.xml.gz --log verbose.log
