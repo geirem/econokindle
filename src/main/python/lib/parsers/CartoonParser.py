@@ -16,8 +16,8 @@ class CartoonParser(Parser):
         return {
             'title': Parser._apply_html_entities(self._script['title']),
             'text': '<p><img alt="" src="' + image.split('/').pop() + '"/></p>',
-            'section': 'The World Today',
-            'flytitle': '',
+            'section': 'The world this week',
+            'subheadline': '',
             'headline': '',
         }
 

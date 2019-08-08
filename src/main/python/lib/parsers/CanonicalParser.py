@@ -30,6 +30,9 @@ class CanonicalParser(Parser):
         headline = self._script['headline']
         subheadline = self._script['subheadline']
         description = self._script['description']
+        dateline = self._script['dateline']
+        if dateline is None:
+            dateline = ''
         text = self._parse_html(self._script[text_field], self._images)
         if image:
             self._images.append(image)
@@ -38,13 +41,14 @@ class CanonicalParser(Parser):
             'title': self._apply_html_entities(headline),
             'text': self._apply_html_entities(text),
             'section': self._apply_html_entities(section),
-            'flytitle': self._apply_html_entities(subheadline),
             'subheadline': self._apply_html_entities(subheadline),
             'description': self._apply_html_entities(description),
+            'dateline': self._apply_html_entities(dateline),
             'image': image,
         }
         return result
 
+    # TODO: JsonPath this?
     @staticmethod
     def wants(script: dict) -> Optional[dict]:
         for i in [3, 4, 5]:

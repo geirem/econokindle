@@ -18,11 +18,14 @@
     {% for article in section['articles'] -%}
         <a name="{{ article['id'] }}"><h3 itemprop="alternativeHeadline">{{ article['subheadline'] }}</h3></a>
         <h1 itemprop="headline">{{ article['title'] }}</h1>
-        {% if article['image'] -%}
-            <img src="{{ article['image'] }}" alt=""/>
+        {% if article['dateline'] -%}
+            <p style="top-margin: 1.5em;"><i>{{ article['dateline'] }}</i></p>
         {% endif -%}
         {% if article['description'] -%}
-            <p style="margin: 1.5em;"><i>{{ article['description'] }}</i></p>
+            <p style="bottom-margin: 1em;"><i>{{ article['description'] }}</i></p>
+        {% endif -%}
+        {% if article['image'] -%}
+            <p style="bottom-margin: 1em;"><img src="{{ article['image'] }}" alt=""/></p>
         {% endif -%}
         {{ article['text'] }}
         <mbp:pagebreak/>

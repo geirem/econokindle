@@ -6,7 +6,7 @@
         <dc:language>en</dc:language>
         <dc-metadata xmlns:dc="http://purl.org/metadata/dublin_core" xmlns:oebpackage="http://openebook.org/namespaces/oeb-package/1.0/" xmlns:opf="http://www.idpf.org/2007/opf">
             <dc:Language>EN</dc:Language>
-            <dc:Title>{{ title }}</dc:Title>
+            <dc:Title>{{ issue['title'] }}</dc:Title>
             <dc:Publisher>The Economist</dc:Publisher>
         </dc-metadata>
         <x-metadata>
@@ -19,7 +19,7 @@
         <item id="tc" href="toc.html" media-type="application/xhtml+xml"/>
         <item id="book" href="economist.html" media-type="application/xhtml+xml"/>
         <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
-        <item id="cover" href="cover.jpg" media-type="image/jpeg" />
+        <item id="cover" href="{{ issue['cover_image_name'] }}" media-type="image/jpeg" />
     </manifest>
 
     <!-- Each itemref references the id of a document designated in the manifest. The order of the itemref elements organizes the associated content files into the linear reading order of the publication.  -->

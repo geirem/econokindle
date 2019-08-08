@@ -25,12 +25,6 @@ file_loader = FileSystemLoader(RESOURCES)
 env = Environment(loader=file_loader)
 
 
-def parse_root(document: str) -> list:
-    jscript = extract_script(document)
-    urls = jscript[1]['response']['canonical']['_hasPart3HyMUO']['parts']
-    return urls
-
-
 def extract_script(document: str) -> Optional[dict]:
     script = re.findall('<script id="preloadedData" type="application/json">.+?</script>', document.replace('\n', ''))
     script = script.pop().replace('<script id="preloadedData" type="application/json">', '')
@@ -50,51 +44,80 @@ def article_filter(url: str) -> bool:
     return True
 
 
-def main():
-    edition = '2019-08-03'
-    root = fetcher.fetch('https://www.economist.com/printedition/' + edition)
-    raw_articles = parse_root(root)
-    images = []
+def parse_root(document: str) -> dict:
+    jscript = extract_script(document)
+    name = ''
+    for item in jscript[1]['response']['canonical']:
+        if item.startswith('_hasPart'):
+            name = item
+            break
+    if name == '':
+        raise Exception
+    canonical = jscript[1]['response']['canonical']
+    cover = canonical['image']['cover'][0]
+    cover_url = cover['url']['canonical']
+    cover_title = cover['headline']
+    parts = canonical[name]['parts']
+    urls = []
     sections = OrderedDict()
-    sections['The World Today'] = {
-        'articles': [],
-        'id': 'section_1',
-    }
-    sections['Leaders'] = {
-        'articles': [],
-        'id': 'section_2',
-    }
-    article_count = 0
-    for raw_article in raw_articles:
-        url = raw_article['url']['canonical']
+    for part in parts:
+        url = part['url']['canonical']
         if not article_filter(url):
             continue
-        document = fetcher.fetch(url)
-        script = extract_script(document)
-        parser = parsing_strategy(script, images, url)
-        article = parser.parse()
-        section = article['section']
+        urls.append(url)
+        section = part['print']['section']['headline']
         if section not in sections:
             sections[section] = {
                 'articles': [],
                 'id': 'section_' + str(len(sections)),
             }
+    return {
+        'cover_image_url': cover_url,
+        'cover_title': cover_title,
+        'sections': sections,
+        'urls': urls,
+    }
+
+
+def save_cover_image(issue: dict) -> None:
+    url = issue['cover_image_url']
+    fetcher.fetch_image(url)
+    cover_image_name = url.split('/').pop()
+    issue['cover_image_name'] = cover_image_name
+
+
+def main():
+    edition = '2019-08-03'
+    root = fetcher.fetch('https://www.economist.com/printedition/' + edition)
+    issue = parse_root(root)
+    save_cover_image(issue)
+    issue['title'] = 'The Economist - ' + edition
+    images = []
+    sections = issue['sections']
+    article_count = 0
+    for url in issue['urls']:
+        document = fetcher.fetch(url)
+        script = extract_script(document)
+        parser = parsing_strategy(script, images, url)
+        article = parser.parse()
+        section = article['section']
         article_count += 1
         article['id'] = 'article_' + str(article_count)
         sections[section]['articles'].append(article)
     for image in images:
         fetcher.fetch_image(image)
-    render('toc.jinja', 'toc.html', sections, 'The Economist ' + edition)
-    render('ncx.jinja', 'toc.ncx', sections, 'The Economist ' + edition)
-    render('book.jinja', 'economist.html', sections, 'The Economist ' + edition)
-    render('opf.jinja', 'economist.opf', sections, 'The Economist ' + edition)
+    render('toc.jinja', 'toc.html', issue)
+    render('ncx.jinja', 'toc.ncx', issue)
+    render('book.jinja', 'economist.html', issue)
+    render('opf.jinja', 'economist.opf', issue)
     copyfile(RESOURCES + '/style.css', WORK + 'style.css')
     subprocess.call([KINDLE_GEN, 'economist.opf'], cwd=WORK)
     copyfile(WORK + 'economist.mobi', 'economist.mobi')
 
 
-def render(template: str, file: str, sections: OrderedDict, title: str) -> None:
-    content = env.get_template(template).render(sections=sections, title=title)
+def render(template: str, file: str, issue: dict) -> None:
+    sections = issue['sections']
+    content = env.get_template(template).render(sections=sections, title=issue['title'], issue=issue)
     with open(WORK + file, 'wt') as writer:
         writer.write(content)
 
