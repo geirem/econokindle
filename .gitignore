@@ -6,3 +6,6 @@
 *.iml
 .DS_Store
 __pycache__
+/bin/
+/owasp/
+/lib/
