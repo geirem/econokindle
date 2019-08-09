@@ -11,9 +11,7 @@ from jinja2 import Environment, FileSystemLoader
 
 from lib.Cache import Cache
 from lib.Fetcher import Fetcher
-from lib.parsers.CanonicalParser import CanonicalParser
-from lib.parsers.CartoonParser import CartoonParser
-from lib.parsers.Parser import Parser
+from lib.Parser import Parser
 
 WORK = './cache/'
 RESOURCES = 'src/main/resources'
@@ -87,25 +85,26 @@ def save_cover_image(issue: dict) -> None:
 
 
 def main():
-    edition = '2019-08-03'
+    edition = '2019-08-10'
     root = fetcher.fetch('https://www.economist.com/printedition/' + edition)
     issue = parse_root(root)
     save_cover_image(issue)
     issue['title'] = 'The Economist - ' + edition
-    images = []
     sections = issue['sections']
     article_count = 0
     for url in issue['urls']:
+        print(f'Processing {url}...', end='')
         document = fetcher.fetch(url)
         script = extract_script(document)
-        parser = parsing_strategy(script, images, url)
+        parser = Parser(script)
         article = parser.parse()
+        for image_url in article['images']:
+            fetcher.fetch_image(image_url)
         section = article['section']
         article_count += 1
         article['id'] = 'article_' + str(article_count)
         sections[section]['articles'].append(article)
-    for image in images:
-        fetcher.fetch_image(image)
+        print('done.')
     render('toc.jinja', 'toc.html', issue)
     render('ncx.jinja', 'toc.ncx', issue)
     render('book.jinja', 'economist.html', issue)
@@ -120,13 +119,6 @@ def render(template: str, file: str, issue: dict) -> None:
     content = env.get_template(template).render(sections=sections, title=issue['title'], issue=issue)
     with open(WORK + file, 'wt') as writer:
         writer.write(content)
-
-
-def parsing_strategy(script: dict, images: list, url: str) -> Parser:
-    if url.endswith('kals-cartoon'):
-        return CartoonParser(CartoonParser.wants(script), images)
-    content = CanonicalParser.wants(script)
-    return CanonicalParser(content, images)
 
 
 main()

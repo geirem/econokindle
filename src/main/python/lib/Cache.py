@@ -40,7 +40,7 @@ class Cache:
         if self.__is_image(document):
             with open(key, 'wb') as out:
                 while True:
-                    data = contents.read(1024)
+                    data = contents.read(1024*256)
                     if not data:
                         break
                     out.write(data)
