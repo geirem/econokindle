@@ -17,7 +17,7 @@ WORK = './cache/'
 RESOURCES = 'src/main/resources'
 KINDLE_GEN = '/Users/geirem/bin/kindlegen'
 pool_manager = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
-cache = Cache(WORK)
+cache = Cache(WORK, 5*86400)
 fetcher = Fetcher(pool_manager, cache)
 file_loader = FileSystemLoader(RESOURCES)
 env = Environment(loader=file_loader)
@@ -30,16 +30,19 @@ def extract_script(document: str) -> Optional[dict]:
     return json.loads(script)
 
 
-def article_filter(url: str) -> bool:
+def should_exclude_article(url: str) -> bool:
     if url.split('/').pop() in [
         'politics-this-week',
         'business-this-week',
         'economic-data-commodities-and-markets',
     ]:
-        return False
-    if url.split('/')[3] in ['letters', 'graphic-detail']:
-        return False
-    return True
+        return True
+    if url.split('/')[3] in [
+        'letters',
+        'graphic-detail'
+    ]:
+        return True
+    return False
 
 
 def parse_root(document: str) -> dict:
@@ -60,7 +63,7 @@ def parse_root(document: str) -> dict:
     sections = OrderedDict()
     for part in parts:
         url = part['url']['canonical']
-        if not article_filter(url):
+        if should_exclude_article(url):
             continue
         urls.append(url)
         section = part['print']['section']['headline']
@@ -93,7 +96,6 @@ def main():
     sections = issue['sections']
     article_count = 0
     for url in issue['urls']:
-        print(f'Processing {url}...', end='')
         document = fetcher.fetch(url)
         script = extract_script(document)
         parser = Parser(script)
@@ -104,7 +106,6 @@ def main():
         article_count += 1
         article['id'] = 'article_' + str(article_count)
         sections[section]['articles'].append(article)
-        print('done.')
     render('toc.jinja', 'toc.html', issue)
     render('ncx.jinja', 'toc.ncx', issue)
     render('book.jinja', 'economist.html', issue)

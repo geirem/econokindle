@@ -1,21 +1,28 @@
 import os.path
+import time
 from typing import Optional, Any
 import os
 
 
 class Cache:
 
-    def __init__(self, path: str):
+    def __init__(self, path: str, max_age: int):
         if not path.endswith('/'):
             path += '/'
         self.__path = path
+        self.__max_age = max_age
         if not os.path.exists(path):
             os.makedirs(path)
 
     def has(self, key: str) -> bool:
         if not key.startswith('.'):
             key = self.__key(key)
-        return os.path.isfile(key)
+        if not os.path.isfile(key):
+            return False
+        file_info = os.stat(key)
+        if time.time() - file_info.st_mtime > self.__max_age:
+            return False
+        return True
 
     @staticmethod
     def __canonicalize_name(document: str) -> str:
