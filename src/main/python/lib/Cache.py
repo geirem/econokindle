@@ -1,16 +1,19 @@
-import os.path
-import time
-from typing import Optional, Any
 import os
+import os.path
+from typing import Optional, Any
 
 
 class Cache:
 
-    def __init__(self, path: str, max_age: int):
+    BUFFER_SIZE = 1024 * 256
+
+    # TODO: age / now can be combined to the time stamp before which items are stale.
+    def __init__(self, path: str, max_age: int, now: float):
         if not path.endswith('/'):
             path += '/'
         self.__path = path
         self.__max_age = max_age
+        self.__now = now
         if not os.path.exists(path):
             os.makedirs(path)
 
@@ -20,7 +23,7 @@ class Cache:
         if not os.path.isfile(key):
             return False
         file_info = os.stat(key)
-        if time.time() - file_info.st_mtime > self.__max_age:
+        if self.__now - file_info.st_mtime > self.__max_age:
             return False
         return True
 
@@ -47,7 +50,7 @@ class Cache:
         if self.__is_image(document):
             with open(key, 'wb') as out:
                 while True:
-                    data = contents.read(1024*256)
+                    data = contents.read(self.BUFFER_SIZE)
                     if not data:
                         break
                     out.write(data)

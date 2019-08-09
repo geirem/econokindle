@@ -2,6 +2,7 @@ import json
 import os
 import re
 import subprocess
+import time
 from collections import OrderedDict
 from shutil import copyfile
 from typing import Optional
@@ -95,7 +96,7 @@ def save_cover_image(issue: dict, fetcher: Fetcher) -> None:
 def main():
     args = parse_args()
     pool_manager = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
-    cache = Cache(WORK, args.max_age*86400 if args.max_age else 5*86400)
+    cache = Cache(WORK, args.max_age*86400 if args.max_age else 5*86400, time.time())
     edition = args.edition if args.edition else '2019-08-10'
     kindle_gen = args.kindle_gen if args.kindle_gen else os.environ['HOME'] + '/bin/kindlegen'
     fetcher = Fetcher(pool_manager, cache)
