@@ -1,5 +1,6 @@
 import os
 import os.path
+import time
 from typing import Optional, Any
 
 
@@ -8,12 +9,12 @@ class Cache:
     BUFFER_SIZE = 1024 * 256
 
     # TODO: age / now can be combined to the time stamp before which items are stale.
-    def __init__(self, path: str, max_age: int, now: float):
+    def __init__(self, path: str, max_age: int):
         if not path.endswith('/'):
             path += '/'
         self.__path = path
         self.__max_age = max_age
-        self.__now = now
+        self.__now = time.time()
         if not os.path.exists(path):
             os.makedirs(path)
 
