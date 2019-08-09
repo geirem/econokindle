@@ -139,7 +139,6 @@ def main():
     render('opf.jinja', 'economist.opf', issue)
     copyfile(RESOURCES + '/style.css', WORK + 'style.css')
     subprocess.call([kindle_gen, 'economist.opf'], cwd=WORK)
-    copyfile(WORK + 'economist.mobi', 'economist.mobi')
 
 
 def render(template: str, file: str, issue: dict) -> None:
