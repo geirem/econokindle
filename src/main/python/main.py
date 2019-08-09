@@ -1,10 +1,11 @@
 import json
+import os
 import re
 import subprocess
 from collections import OrderedDict
 from shutil import copyfile
 from typing import Optional
-
+import argparse
 import certifi
 import urllib3
 from jinja2 import Environment, FileSystemLoader
@@ -15,12 +16,16 @@ from lib.Parser import Parser
 
 WORK = './cache/'
 RESOURCES = 'src/main/resources'
-KINDLE_GEN = '/Users/geirem/bin/kindlegen'
-pool_manager = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
-cache = Cache(WORK, 5*86400)
-fetcher = Fetcher(pool_manager, cache)
 file_loader = FileSystemLoader(RESOURCES)
 env = Environment(loader=file_loader)
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-e', '--edition', help='The edition to render.  Default is current edition.')
+    parser.add_argument('-a', '--max_age', help='Days before cached items are refreshed.  Default is five.')
+    parser.add_argument('-k', '--kindlegen', help='Path to "kindlegen" binary.  Default is ~/bin/kindlegen')
+    return parser.parse_args()
 
 
 def extract_script(document: str) -> Optional[dict]:
@@ -80,7 +85,7 @@ def parse_root(document: str) -> dict:
     }
 
 
-def save_cover_image(issue: dict) -> None:
+def save_cover_image(issue: dict, fetcher: Fetcher) -> None:
     url = issue['cover_image_url']
     fetcher.fetch_image(url)
     cover_image_name = url.split('/').pop()
@@ -88,10 +93,15 @@ def save_cover_image(issue: dict) -> None:
 
 
 def main():
-    edition = '2019-08-10'
+    args = parse_args()
+    pool_manager = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
+    cache = Cache(WORK, args.max_age*86400 if args.max_age else 5*86400)
+    edition = args.edition if args.edition else '2019-08-10'
+    kindle_gen = args.kindle_gen if args.kindle_gen else os.environ['HOME'] + '/bin/kindlegen'
+    fetcher = Fetcher(pool_manager, cache)
     root = fetcher.fetch('https://www.economist.com/printedition/' + edition)
     issue = parse_root(root)
-    save_cover_image(issue)
+    save_cover_image(issue, fetcher)
     issue['title'] = 'The Economist - ' + edition
     sections = issue['sections']
     article_count = 0
@@ -111,7 +121,7 @@ def main():
     render('book.jinja', 'economist.html', issue)
     render('opf.jinja', 'economist.opf', issue)
     copyfile(RESOURCES + '/style.css', WORK + 'style.css')
-    subprocess.call([KINDLE_GEN, 'economist.opf'], cwd=WORK)
+    subprocess.call([kindle_gen, 'economist.opf'], cwd=WORK)
     copyfile(WORK + 'economist.mobi', 'economist.mobi')
 
 
