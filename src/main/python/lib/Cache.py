@@ -34,6 +34,8 @@ class Cache:
 
     def __key(self, document: str) -> str:
         key = self.__path + self.__canonicalize_name(document)
+        if  key == self.__path or key is None:
+            return self.__path + 'index'
         return key
 
     def get(self, document: str) -> Optional[str]:

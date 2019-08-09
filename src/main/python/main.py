@@ -93,17 +93,33 @@ def save_cover_image(issue: dict, fetcher: Fetcher) -> None:
     issue['cover_image_name'] = cover_image_name
 
 
+def parse_index(script: dict) -> str:
+    for item in script:
+        if 'canonical' not in item['response']:
+            continue
+        for sub_item, value in item['response']['canonical'].items():
+            if sub_item.startswith('_hasPart'):
+                return value['parts'][0]['url']['canonical']
+
+
 def main():
     args = parse_args()
     pool_manager = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
     cache = Cache(WORK, args.max_age*86400 if args.max_age else 5*86400)
-    edition = args.edition if args.edition else '2019-08-10'
-    kindle_gen = args.kindle_gen if args.kindle_gen else os.environ['HOME'] + '/bin/kindlegen'
+    kindle_gen = os.environ['HOME'] + '/bin/kindlegen'
+    if 'kindle_gen' in args:
+        kindle_gen = args.kindle_gen
     fetcher = Fetcher(pool_manager, cache)
-    root = fetcher.fetch('https://www.economist.com/printedition/' + edition)
+    if args.edition:
+        issue_pointer = 'https://www.economist.com/printedition/' + args.edition
+    else:
+        front = fetcher.fetch('https://www.economist.com/')
+        front_script = extract_script(front)
+        issue_pointer = parse_index(front_script)
+    root = fetcher.fetch(issue_pointer)
     issue = parse_root(root)
     save_cover_image(issue, fetcher)
-    issue['title'] = 'The Economist - ' + edition
+    issue['title'] = 'The Economist - ' + issue['cover_title']
     sections = issue['sections']
     article_count = 0
     for url in issue['urls']:
