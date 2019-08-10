@@ -10,6 +10,7 @@ from typing import Optional
 import certifi
 import urllib3
 from jinja2 import Environment, FileSystemLoader
+from jsonpath_rw import parse
 
 from lib.Cache import Cache
 from lib.Fetcher import Fetcher
@@ -54,13 +55,13 @@ def should_exclude_article(url: str) -> bool:
 def parse_root(document: str) -> dict:
     jscript = extract_script(document)
     name = ''
-    for item in jscript[1]['response']['canonical']:
+    canonical = parse('[*].response.canonical').find(jscript).pop().value
+    for item in canonical:
         if item.startswith('_hasPart'):
             name = item
             break
     if name == '':
         raise Exception
-    canonical = jscript[1]['response']['canonical']
     cover = canonical['image']['cover'][0]
     cover_url = cover['url']['canonical']
     cover_title = cover['headline']

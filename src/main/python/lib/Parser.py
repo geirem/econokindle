@@ -1,22 +1,21 @@
 from typing import Optional
 
+from jsonpath_rw import parse
+
 
 class Parser:
 
     def __init__(self, script: dict):
-        for item in [0, 1, 2, 3, 4, 5]:
-            if 'canonical' in script[item]['response']:
-                self.__script = script[item]['response']['canonical']
-                break
+        self.__script = parse('[*].response.canonical').find(script).pop().value
         self.__images = []
         self.__parsed_elements = []
+        self.__url_path = parse('image.main.url.canonical')
 
     def __extract_main_image(self) -> Optional[str]:
-        if 'image' in self.__script:
-            if 'main' in self.__script['image']:
-                if 'url' in self.__script['image']['main']:
-                    if 'canonical' in self.__script['image']['main']['url']:
-                        return self.__script['image']['main']['url']['canonical']
+        url = self.__url_path.find(self.__script)
+        if len(url) == 1:
+            return url.pop().value
+        return None
 
     def __find_text_data(self) -> Optional[str]:
         for item in self.__script:
@@ -49,25 +48,14 @@ class Parser:
         }
         return result
 
-    @staticmethod
-    def _get_response(script: dict, index: int, field: str) -> Optional[dict]:
-        if len(script) - 1 < index:
-            return None
-        if 'response' not in script[index]:
-            return None
-        if field not in script[index]['response']:
-            return None
-        return script[index]['response'][field]
-
     def _parse_html(self, element: dict) -> None:
         for item in element:
             if item['type'] == 'text':
                 self.__parsed_elements.append(item['data'])
             if item['type'] == 'tag':
                 tag = self.__parse_tag_type(item)
-                children = item['children']
                 self.__parsed_elements.append(tag['open'])
-                self._parse_html(children)
+                self._parse_html(item['children'])
                 self.__parsed_elements.append(tag['close'])
 
     def __parse_tag_type(self, item: dict) -> dict:
@@ -94,4 +82,4 @@ class Parser:
 
     @staticmethod
     def _apply_html_entities(processed: str) -> str:
-        return processed.encode(encoding="ascii", errors="xmlcharrefreplace").decode("utf-8")
+        return processed.encode(encoding='ascii', errors='xmlcharrefreplace').decode('utf-8')

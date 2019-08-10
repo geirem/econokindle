@@ -8,6 +8,7 @@ verify_ssl = true
 [packages]
 urllib3 = {extras = ["security"],version = "*"}
 jinja2 = "*"
+jsonpath-rw = "*"
 
 [requires]
 python_version = "3.7"
