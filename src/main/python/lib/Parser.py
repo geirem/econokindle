@@ -73,7 +73,7 @@ class Parser:
         attributes = item['attribs']
         if name == 'a':
             href = self.__key_creator.key(attributes['href'])
-            tag['open'] = f'<a href="economist.html#{href}">'
+            tag['open'] = f'<a href="#{href}">'
         if name == 'span':
             if 'data-caps' in attributes and attributes['data-caps'] == 'initial':
                 tag['open'] = '<span class="dropcaps">'
