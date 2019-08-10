@@ -75,8 +75,10 @@ class Parser:
             return {'open': '', 'close': ''}
         if name == 'a':
             href = self.__key_creator.key(attributes['href'])
+            # Hack to support references to articles in other issues.
             if href not in self.__valid_references:
-                return {'open': '', 'close': ''}
+                href = attributes['href']
+                tag['open'] = f'<a href="#{href}">online '
             tag['open'] = f'<a href="#{href}">'
         if name == 'span':
             if 'data-caps' in attributes and attributes['data-caps'] == 'initial':
