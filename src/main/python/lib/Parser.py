@@ -61,17 +61,14 @@ class Parser:
 
     def _parse_html(self, element: dict) -> None:
         for item in element:
-            try:
+            if item['type'] == 'text':
                 self.__parsed_elements.append(item['data'])
-            except:
-                pass
-            if item['type'] != 'tag':
-                continue
-            tag = self.__parse_tag_type(item)
-            children = item['children']
-            self.__parsed_elements.append(tag['open'])
-            self._parse_html(children)
-            self.__parsed_elements.append(tag['close'])
+            if item['type'] == 'tag':
+                tag = self.__parse_tag_type(item)
+                children = item['children']
+                self.__parsed_elements.append(tag['open'])
+                self._parse_html(children)
+                self.__parsed_elements.append(tag['close'])
 
     def __parse_tag_type(self, item: dict) -> dict:
         tag_name = item['name']
@@ -91,7 +88,8 @@ class Parser:
             src = attributes['src']
             name = src.split('/').pop()
             self.__images.append(src)
-            tag['open'] = '<img alt="" src="' + name + '"/>'
+            tag['open'] = '<img alt="" src="' + name + '" height="' + attributes['height'] + '" width="' + attributes['width'] + '"/>'
+            tag['close'] = ''
         return tag
 
     @staticmethod
