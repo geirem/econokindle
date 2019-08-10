@@ -2,13 +2,16 @@ from typing import Optional
 
 from jsonpath_rw import parse
 
+from lib import KeyCreator
+
 
 class Parser:
 
-    def __init__(self, script: dict):
+    def __init__(self, script: dict, key_creator: KeyCreator):
         self.__script = parse('[*].response.canonical').find(script).pop().value
         self.__images = []
         self.__parsed_elements = []
+        self.__key_creator = key_creator
         self.__url_path = parse('image.main.url.canonical')
 
     def __extract_main_image(self) -> Optional[str]:
@@ -23,6 +26,7 @@ class Parser:
                 return item
 
     def parse(self) -> dict:
+        article_id = self.__key_creator.key(self.__script['url']['canonical'])
         image = self.__extract_main_image()
         text_field = self.__find_text_data()
         section = self.__script['print']['section']['headline']
@@ -35,7 +39,7 @@ class Parser:
         self._parse_html(self.__script[text_field])
         if image:
             self.__images.append(image)
-            image = image.split('/').pop()
+            image = self.__key_creator.key(image)
         result = {
             'title': self._apply_html_entities(headline),
             'text': self._apply_html_entities(''.join(self.__parsed_elements)),
@@ -45,6 +49,7 @@ class Parser:
             'dateline': self._apply_html_entities(dateline),
             'image': image,
             'images': self.__images,
+            'id': article_id,
         }
         return result
 
@@ -52,29 +57,32 @@ class Parser:
         for item in element:
             if item['type'] == 'text':
                 self.__parsed_elements.append(item['data'])
-            if item['type'] == 'tag':
+            elif item['type'] == 'tag':
                 tag = self.__parse_tag_type(item)
                 self.__parsed_elements.append(tag['open'])
                 self._parse_html(item['children'])
                 self.__parsed_elements.append(tag['close'])
 
     def __parse_tag_type(self, item: dict) -> dict:
-        tag_name = item['name']
+        name = item['name']
         tag = {
-            'name': tag_name,
-            'open': '<' + tag_name + '>',
-            'close': '</' + tag_name + '>',
+            'name': name,
+            'open': '<' + name + '>',
+            'close': '</' + name + '>',
         }
         attributes = item['attribs']
-        if tag_name == 'span':
+        if name == 'a':
+            href = self.__key_creator.key(attributes['href'])
+            tag['open'] = f'<a href="economist.html#{href}">'
+        if name == 'span':
             if 'data-caps' in attributes and attributes['data-caps'] == 'initial':
                 tag['open'] = '<span class="dropcaps">'
-        if tag_name == 'br':
+        if name == 'br':
             tag['open'] = ''
             tag['close'] = ''
-        if tag_name == 'img':
+        if name == 'img':
             src = attributes['src']
-            name = src.split('/').pop()
+            name = self.__key_creator.key(src)
             self.__images.append(src)
             tag['open'] = '<img alt="" src="' + name + '" height="' + attributes['height'] + '" width="' + attributes['width'] + '"/>'
             tag['close'] = ''

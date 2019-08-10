@@ -3,20 +3,23 @@ import os.path
 import time
 from typing import Optional, Any
 
+from lib import KeyCreator
+
 
 class Cache:
 
     BUFFER_SIZE = 1024 * 256
 
     # TODO: age / now can be combined to the time stamp before which items are stale.
-    def __init__(self, path: str, max_age: int):
+    def __init__(self, path: str, max_age: int, key_creator: KeyCreator):
+        if not os.path.exists(path):
+            os.makedirs(path)
         if not path.endswith('/'):
             path += '/'
         self.__path = path
         self.__max_age = max_age
         self.__now = time.time()
-        if not os.path.exists(path):
-            os.makedirs(path)
+        self.__key_creator = key_creator
 
     def has(self, key: str) -> bool:
         if not key.startswith('.'):
@@ -28,15 +31,8 @@ class Cache:
             return False
         return True
 
-    @staticmethod
-    def __canonicalize_name(document: str) -> str:
-        return document.split('/').pop()
-
     def __key(self, document: str) -> str:
-        key = self.__path + self.__canonicalize_name(document)
-        if  key == self.__path or key is None:
-            return self.__path + 'index'
-        return key
+        return self.__path + self.__key_creator.key(document)
 
     def get(self, document: str) -> Optional[str]:
         key = self.__key(document)

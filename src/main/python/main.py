@@ -14,6 +14,7 @@ from jsonpath_rw import parse
 
 from lib.Cache import Cache
 from lib.Fetcher import Fetcher
+from lib.KeyCreator import KeyCreator
 from lib.Parser import Parser
 
 WORK = './cache/'
@@ -87,10 +88,10 @@ def parse_root(document: str) -> dict:
     }
 
 
-def save_cover_image(issue: dict, fetcher: Fetcher) -> None:
+def save_cover_image(issue: dict, fetcher: Fetcher, key_creator: KeyCreator) -> None:
     url = issue['cover_image_url']
     fetcher.fetch_image(url)
-    cover_image_name = url.split('/').pop()
+    cover_image_name = key_creator.key(url)
     issue['cover_image_name'] = cover_image_name
 
 
@@ -106,7 +107,8 @@ def parse_index(script: dict) -> str:
 def main():
     args = parse_args()
     pool_manager = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
-    cache = Cache(WORK, args.max_age*86400 if args.max_age else 5*86400)
+    key_creator = KeyCreator()
+    cache = Cache(WORK, args.max_age*86400 if args.max_age else 5*86400, key_creator)
     kindle_gen = os.environ['HOME'] + '/bin/kindlegen'
     if 'kindle_gen' in args:
         kindle_gen = args.kindle_gen
@@ -119,20 +121,15 @@ def main():
         issue_pointer = parse_index(front_script)
     root = fetcher.fetch(issue_pointer)
     issue = parse_root(root)
-    save_cover_image(issue, fetcher)
+    save_cover_image(issue, fetcher, key_creator)
     issue['title'] = 'The Economist - ' + issue['cover_title']
     sections = issue['sections']
-    article_count = 0
     for url in issue['urls']:
         document = fetcher.fetch(url)
-        script = extract_script(document)
-        parser = Parser(script)
-        article = parser.parse()
+        article = Parser(extract_script(document), key_creator).parse()
         for image_url in article['images']:
             fetcher.fetch_image(image_url)
         section = article['section']
-        article_count += 1
-        article['id'] = 'article_' + str(article_count)
         sections[section]['articles'].append(article)
     render('toc.jinja', 'toc.html', issue)
     render('ncx.jinja', 'toc.ncx', issue)
