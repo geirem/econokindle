@@ -30,3 +30,19 @@ h3 {
     text-indent: 0;
     margin: 1.5em;
 }
+
+@media amzn-kf8 {
+    span.dropcaps {
+        font-weight:normal;
+        font-size:320%;
+        float:left;
+        margin-top:-0.3225em;
+        margin-bottom:-0.3245em;
+    }
+}
+@media amzn-mobi {
+    span.dropcaps {
+        font-size:3em;
+        font-weight: bold;
+    }
+}
