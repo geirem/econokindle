@@ -7,12 +7,13 @@ from lib import KeyCreator
 
 class Parser:
 
-    def __init__(self, script: dict, key_creator: KeyCreator):
+    def __init__(self, script: dict, key_creator: KeyCreator, valid_references: list):
         self.__script = parse('[*].response.canonical').find(script).pop().value
         self.__images = []
         self.__parsed_elements = []
         self.__key_creator = key_creator
         self.__url_path = parse('image.main.url.canonical')
+        self.__valid_references = valid_references
 
     def __extract_main_image(self) -> Optional[str]:
         url = self.__url_path.find(self.__script)
@@ -66,13 +67,16 @@ class Parser:
     def __parse_tag_type(self, item: dict) -> dict:
         name = item['name']
         tag = {
-            'name': name,
             'open': '<' + name + '>',
             'close': '</' + name + '>',
         }
         attributes = item['attribs']
+        if name == 'iframe':
+            return {'open': '', 'close': ''}
         if name == 'a':
             href = self.__key_creator.key(attributes['href'])
+            if href not in self.__valid_references:
+                return {'open': '', 'close': ''}
             tag['open'] = f'<a href="#{href}">'
         if name == 'span':
             if 'data-caps' in attributes and attributes['data-caps'] == 'initial':

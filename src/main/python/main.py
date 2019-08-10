@@ -38,22 +38,7 @@ def extract_script(document: str) -> Optional[dict]:
     return json.loads(script)
 
 
-def should_exclude_article(url: str) -> bool:
-    if url.split('/').pop() in [
-        'politics-this-week',
-        'business-this-week',
-        'economic-data-commodities-and-markets',
-    ]:
-        return True
-    if url.split('/')[3] in [
-        'letters',
-        'graphic-detail'
-    ]:
-        return True
-    return False
-
-
-def parse_root(document: str) -> dict:
+def parse_root(document: str, key_creator: KeyCreator) -> dict:
     jscript = extract_script(document)
     name = ''
     canonical = parse('[*].response.canonical').find(jscript).pop().value
@@ -68,12 +53,12 @@ def parse_root(document: str) -> dict:
     cover_title = cover['headline']
     parts = canonical[name]['parts']
     urls = []
+    references = []
     sections = OrderedDict()
     for part in parts:
         url = part['url']['canonical']
-        if should_exclude_article(url):
-            continue
         urls.append(url)
+        references.append(key_creator.key(url))
         section = part['print']['section']['headline']
         if section not in sections:
             sections[section] = {
@@ -85,6 +70,7 @@ def parse_root(document: str) -> dict:
         'cover_title': cover_title,
         'sections': sections,
         'urls': urls,
+        'references': references,
     }
 
 
@@ -120,13 +106,13 @@ def main():
         front_script = extract_script(front)
         issue_pointer = parse_index(front_script)
     root = fetcher.fetch(issue_pointer)
-    issue = parse_root(root)
+    issue = parse_root(root, key_creator)
     save_cover_image(issue, fetcher, key_creator)
     issue['title'] = 'The Economist - ' + issue['cover_title']
     sections = issue['sections']
     for url in issue['urls']:
         document = fetcher.fetch(url)
-        article = Parser(extract_script(document), key_creator).parse()
+        article = Parser(extract_script(document), key_creator, issue['references']).parse()
         for image_url in article['images']:
             fetcher.fetch_image(image_url)
         section = article['section']
