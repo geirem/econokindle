@@ -33,7 +33,7 @@ def parse_args():
 
 
 def kindle_gen_binary(args: argparse.Namespace) -> str:
-    if 'kindle_gen' not in args:
+    if not args.kindle_gen:
         return os.environ['HOME'] + '/bin/kindlegen'
     kindle_gen = args.kindle_gen
     if not os.path.isfile(kindle_gen) and not kindle_gen.endswith['/kindlegen']:
@@ -135,7 +135,7 @@ def main():
     render('book.jinja', 'economist.html', issue)
     render('opf.jinja', 'economist.opf', issue)
     copyfile(RESOURCES + '/style.css', WORK + 'style.css')
-    # invoke_kindlegen(kindle_gen_binary(args), WORK)
+    invoke_kindlegen(kindle_gen_binary(args), WORK)
 
 
 #NOSONAR
