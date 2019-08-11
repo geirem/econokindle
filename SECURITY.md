@@ -8,6 +8,7 @@ The fetched content is
 processed using `json.loads()` and [JsonPath RW](https://github.com/kennknowles/python-jsonpath-rw).
 
 ## Bug Hunting / Code Review
+#### OWASP Dependency Check
 Dependencies used by the application are scanned for known vulnerabilities using the
 [OWASP Dependency Checker](https://jeremylong.github.io/DependencyCheck/analyzers/python.html).  It currently requires the 
 [NIST Data Mirror](https://github.com/stevespringett/nist-data-mirror/).  
@@ -22,6 +23,10 @@ dependency-check \
 --cveUrl20Base=http://localhost:8080/nvdcve-2.0-%d.xml.gz \
 --log verbose.log
 ```
+
+#### SonarCloud SAST
+SonarCloud status is available in https://sonarcloud.io/dashboard?id=geirem_econokindle.
+
 
 ## Reporting a Bug
 
