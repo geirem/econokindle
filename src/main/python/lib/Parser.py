@@ -21,47 +21,45 @@ class Parser:
             return url.pop().value
         return None
 
-    def __find_text_data(self) -> Optional[str]:
+    def __find_text_data(self) -> dict:
         for item in self.__script:
             if item.startswith('_text'):
-                return item
+                return self.__script[item]
+
+    def _start_body_parsing(self) -> None:
+        for item in self.__script:
+            if item.startswith('_text'):
+                self.__parse_article_body(self.__script[item])
+                return
 
     def parse(self) -> dict:
         article_id = self.__key_creator.key(self.__script['url']['canonical'])
         image = self.__extract_main_image()
-        text_field = self.__find_text_data()
-        section = self.__script['print']['section']['headline']
-        headline = self.__script['headline']
-        subheadline = self.__script['subheadline']
-        description = self.__script['description']
-        dateline = self.__script['dateline']
-        if dateline is None:
-            dateline = ''
-        self._parse_html(self.__script[text_field])
+        self._start_body_parsing()
         if image:
             self.__images.append(image)
             image = self.__key_creator.key(image)
         result = {
-            'title': self._apply_html_entities(headline),
+            'title': self._apply_html_entities(self.__script['headline']),
             'text': self._apply_html_entities(''.join(self.__parsed_elements)),
-            'section': self._apply_html_entities(section),
-            'subheadline': self._apply_html_entities(subheadline),
-            'description': self._apply_html_entities(description),
-            'dateline': self._apply_html_entities(dateline),
+            'section': self._apply_html_entities(self.__script['print']['section']['headline']),
+            'subheadline': self._apply_html_entities(self.__script['subheadline']),
+            'description': self._apply_html_entities(self.__script['description']),
+            'dateline': self._apply_html_entities(self.__script['dateline']),
             'image': image,
             'images': self.__images,
             'id': article_id,
         }
         return result
 
-    def _parse_html(self, element: dict) -> None:
+    def __parse_article_body(self, element: dict) -> None:
         for item in element:
             if item['type'] == 'text':
                 self.__parsed_elements.append(item['data'])
             elif item['type'] == 'tag':
                 tag = self.__parse_tag_type(item)
                 self.__parsed_elements.append(tag['open'])
-                self._parse_html(item['children'])
+                self.__parse_article_body(item['children'])
                 self.__parsed_elements.append(tag['close'])
 
     def __parse_tag_type(self, item: dict) -> dict:
@@ -96,5 +94,7 @@ class Parser:
         return tag
 
     @staticmethod
-    def _apply_html_entities(processed: str) -> str:
+    def _apply_html_entities(processed: Optional[str]) -> str:
+        if processed is None:
+            return ''
         return processed.encode(encoding='ascii', errors='xmlcharrefreplace').decode('utf-8')
