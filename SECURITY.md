@@ -1,4 +1,4 @@
-# Security Policies and Procedures
+# Security Status and Development
 
 ## General
 The application fetches data directly from the Economist (and no other sources), using a verified TLS connection.  The
@@ -25,8 +25,8 @@ dependency-check \
 ```
 
 #### SonarCloud SAST
-SonarCloud status is available in https://sonarcloud.io/dashboard?id=geirem_econokindle.
-
+SonarCloud status is available in https://sonarcloud.io/dashboard?id=geirem_econokindle.  Realtime
+feedback is provided in IntelliJ IDEA using the [SonarLint](https://www.sonarlint.org/intellij/) plugin.
 
 ## Reporting a Bug
 
