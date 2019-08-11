@@ -26,6 +26,7 @@ application, install Python and Pipenv and run the `src/main/python/main.py` scr
 that can be changed from their defaults.  By default, it assumes that:
 * `kindlegen` is installed in `$HOME/bin/`
 * your Kindle is mounted under `/Kindle/documents/`
+The latter default cannot be overridden yet.
 
 ## Bug Reports
 Please submit bug reports or pull requests through GitHub.
