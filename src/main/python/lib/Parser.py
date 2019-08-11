@@ -80,17 +80,11 @@ class Parser:
                 href = attributes['href']
                 tag['open'] = f'<a href="{href}">online '
         if name == 'span':
-            if 'data-caps' in attributes and attributes['data-caps'] == 'initial':
-                tag['open'] = '<span class="dropcaps">'
+            return self.__parse_span(item)
         if name == 'br':
-            tag['open'] = '<br/>'
-            tag['close'] = ''
+            return self.__parse_br(item)
         if name == 'img':
-            src = attributes['src']
-            name = self.__key_creator.key(src)
-            self.__images.append(src)
-            tag['open'] = '<img alt="" src="' + name + '" height="' + attributes['height'] + '" width="' + attributes['width'] + '"/>'
-            tag['close'] = ''
+            return self.__parse_img(item)
         return tag
 
     @staticmethod
@@ -98,3 +92,34 @@ class Parser:
         if processed is None:
             return ''
         return processed.encode(encoding='ascii', errors='xmlcharrefreplace').decode('utf-8')
+
+    # noinspection PyUnusedLocal
+    @staticmethod
+    def __parse_br(item: dict) -> dict:
+        return {
+            'open': '<br/>',
+            'close': '',
+        }
+
+    @staticmethod
+    def __parse_span(item: dict) -> dict:
+        attributes = item['attribs']
+        if 'data-caps' in attributes and attributes['data-caps'] == 'initial':
+            return {
+                'open': '<span class="dropcaps">',
+                'close': '</span>',
+            }
+        return {
+            'open': '<span>',
+            'close': '</span>',
+        }
+
+    def __parse_img(self, item: dict) -> dict:
+        attributes = item['attribs']
+        src = attributes['src']
+        name = self.__key_creator.key(src)
+        self.__images.append(src)
+        return {
+            'open': '<img alt="" src="' + name + '" height="' + attributes['height'] + '" width="' + attributes['width'] + '"/>',
+            'close': '',
+        }

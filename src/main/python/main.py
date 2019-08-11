@@ -23,12 +23,28 @@ file_loader = FileSystemLoader(RESOURCES)
 env = Environment(loader=file_loader)
 
 
+#NOSONAR
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-e', '--edition', help='The edition to render.  Default is current edition.')
     parser.add_argument('-a', '--max_age', help='Days before cached items are refreshed.  Default is five.')
-    parser.add_argument('-k', '--kindlegen', help='Path to "kindlegen" binary.  Default is ~/bin/kindlegen')
+    parser.add_argument('-k', '--kindle_gen', help='Path to "kindlegen" binary.  Default is ~/bin/kindlegen')
     return parser.parse_args()
+
+
+def kindle_gen_binary(args: argparse.Namespace) -> str:
+    if 'kindle_gen' not in args:
+        return os.environ['HOME'] + '/bin/kindlegen'
+    kindle_gen = args.kindle_gen
+    if not os.path.isfile(kindle_gen) and not kindle_gen.endswith['/kindlegen']:
+        raise FileNotFoundError
+    return kindle_gen
+
+
+def max_cache_age(args: argparse.Namespace) -> int:
+    if not args.max_age:
+        return 5*86400
+    return int(args.max_age)
 
 
 def extract_script(document: str) -> Optional[dict]:
@@ -94,12 +110,9 @@ def main():
     args = parse_args()
     pool_manager = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
     key_creator = KeyCreator()
-    cache = Cache(WORK, args.max_age*86400 if args.max_age else 5*86400, key_creator)
-    kindle_gen = os.environ['HOME'] + '/bin/kindlegen'
-    if 'kindle_gen' in args:
-        kindle_gen = args.kindle_gen
+    cache = Cache(WORK, max_cache_age(args), key_creator)
     fetcher = Fetcher(pool_manager, cache)
-    if args.edition:
+    if args.edition and re.search('^\\d{1,2}-\\d{1,2}-\\d{4}$', args.edition):
         issue_pointer = 'https://www.economist.com/printedition/' + args.edition
     else:
         front = fetcher.fetch('https://www.economist.com/')
@@ -122,7 +135,12 @@ def main():
     render('book.jinja', 'economist.html', issue)
     render('opf.jinja', 'economist.opf', issue)
     copyfile(RESOURCES + '/style.css', WORK + 'style.css')
-    subprocess.call([kindle_gen, 'economist.opf'], cwd=WORK)
+    # invoke_kindlegen(kindle_gen_binary(args), WORK)
+
+
+#NOSONAR
+def invoke_kindlegen(kindle_gen: str, path: str) -> None:
+    subprocess.call([kindle_gen, 'economist.opf'], cwd=path)
 
 
 def render(template: str, file: str, issue: dict) -> None:
