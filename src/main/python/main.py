@@ -112,7 +112,7 @@ def main():
     key_creator = KeyCreator()
     cache = Cache(WORK, max_cache_age(args), key_creator)
     fetcher = Fetcher(pool_manager, cache)
-    if args.edition and re.search('^\\d{1,2}-\\d{1,2}-\\d{4}$', args.edition):
+    if args.edition and len(args.edition) <= 10 and re.search('^\\d{1,2}-\\d{1,2}-\\d{4}$', args.edition):
         issue_pointer = 'https://www.economist.com/printedition/' + args.edition
     else:
         front = fetcher.fetch('https://www.economist.com/')
