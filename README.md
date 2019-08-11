@@ -1,6 +1,6 @@
 # Economist Kindle Formatter.
 ## Purpose
-The purpose of this application is to read The Economist on a personal Kindle device.  It downloads the latest
+The purpose of this application is to read The Economist on your personal Kindle device.  It downloads the latest
 edition to a mounted Kindle device.
 
 It is developed and tested using a Mac with Kindle Previewer 3 and Kindle Paperwhite.  Testing for other platforms
