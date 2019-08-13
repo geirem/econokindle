@@ -2,8 +2,9 @@
 /cache/
 *.mobi
 *.html
-.idea
 *.iml
+*.pdf
+.idea
 .DS_Store
 __pycache__
 /bin/
