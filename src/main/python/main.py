@@ -22,6 +22,26 @@ RESOURCES = 'src/main/resources'
 file_loader = FileSystemLoader(RESOURCES)
 env = Environment(loader=file_loader)
 
+#PS C:\Users\o9c\IdeaProjects\econokindle> python.exe .\src\main\python\main.py
+#python.exe : Traceback (most recent call last):
+#At line:1 char:1
+#+ python.exe .\src\main\python\main.py
+#+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#    + CategoryInfo          : NotSpecified: (Traceback (most recent call last)::String) [], RemoteException
+#    + FullyQualifiedErrorId : NativeCommandError
+#
+#  File ".\src\main\python\main.py", line 153, in <module>
+#    main()
+#  File ".\src\main\python\main.py", line 118, in main
+#    front = fetcher.fetch('https://www.economist.com/')
+#  File "C:\Users\o9c\IdeaProjects\econokindle\src\main\python\lib\Fetcher.py", line 20, in fetch
+#    self.__cache.store(url, contents)
+#  File "C:\Users\o9c\IdeaProjects\econokindle\src\main\python\lib\Cache.py", line 58, in store
+#    writer.write(contents)
+#  File "C:\Program Files\Python\Python36\lib\encodings\cp1252.py", line 19, in encode
+#    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+#UnicodeEncodeError: 'charmap' codec can't encode character '\u2192' in position 411747: character maps to <undefined>
+
 
 #NOSONAR
 def parse_args():
