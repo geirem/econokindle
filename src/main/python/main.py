@@ -3,6 +3,7 @@ import json
 import os
 import re
 import subprocess
+import time
 from collections import OrderedDict
 from shutil import copyfile
 from typing import Optional
@@ -124,18 +125,22 @@ def main():
     issue['title'] = 'The Economist - ' + issue['cover_title']
     sections = issue['sections']
     for url in issue['urls']:
+        print(f'Processing {url}...', end='')
         document = fetcher.fetch(url)
         article = Parser(extract_script(document), key_creator, issue['references']).parse()
         for image_url in article['images']:
             fetcher.fetch_image(image_url)
         section = article['section']
         sections[section]['articles'].append(article)
+        print('done.')
     render('toc.jinja', 'toc.html', issue)
     render('ncx.jinja', 'toc.ncx', issue)
     render('book.jinja', 'economist.html', issue)
     render('opf.jinja', 'economist.opf', issue)
     copyfile(RESOURCES + '/style.css', WORK + 'style.css')
     invoke_kindlegen(kindle_gen_binary(args), WORK)
+    if os.path.isfile('/Volumes/Kindle'):
+        copyfile(WORK + 'economist.mobi', '/Volumes/Kindle/documents/economist.mobi')
 
 
 #NOSONAR

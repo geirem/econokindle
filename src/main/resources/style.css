@@ -14,7 +14,8 @@ p {
 h1 {
     margin: 0;
     padding: 0;
-    text-align: center;
+    text-align: left;
+    break-after: avoid-page;
 }
 
 h2 {
@@ -22,6 +23,7 @@ h2 {
     text-align: left;
     text-indent: 0;
     margin-top: 1.5em;
+    break-after: avoid-page;
 }
 
 h3 {
@@ -29,6 +31,16 @@ h3 {
     text-align: left;
     text-indent: 0;
     margin: 1.5em;
+    break-after: avoid-page;
+}
+
+p {
+    orphans: 2;
+    widows: 3;
+}
+
+h2.subheader {
+    margin-bottom: 0.5ex;
 }
 
 @media amzn-kf8 {
@@ -39,10 +51,22 @@ h3 {
         margin-top:-0.3225em;
         margin-bottom:-0.3245em;
     }
+    h1 {
+        margin: 0;
+        padding: 0;
+        text-align: left;
+        break-after: avoid-page;
+    }
 }
 @media amzn-mobi {
     span.dropcaps {
         font-size:3em;
         font-weight: bold;
+    }
+    h1 {
+        margin: 0;
+        padding: 0;
+        text-align: left;
+        break-after: avoid-page;
     }
 }

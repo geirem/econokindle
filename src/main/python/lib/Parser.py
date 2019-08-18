@@ -8,7 +8,11 @@ from lib import KeyCreator
 class Parser:
 
     def __init__(self, script: dict, key_creator: KeyCreator, valid_references: list):
-        self.__script = parse('[*].response.canonical').find(script).pop().value
+        candidates = parse('[*].response.canonical').find(script)
+        for candidate in candidates:
+            if 'url' in candidate.value:
+                self.__script = candidate.value
+                break
         self.__images = []
         self.__parsed_elements = []
         self.__key_creator = key_creator
@@ -20,6 +24,7 @@ class Parser:
             'br': self.__parse_br,
             'iframe': self.__parse_iframe,
             'a': self.__parse_a,
+            'h2': self.__parse_h2,
         }
 
     def __extract_main_image(self) -> Optional[str]:
@@ -117,6 +122,14 @@ class Parser:
         return {
             'open': '<span>',
             'close': '</span>',
+        }
+
+    @staticmethod
+    # noinspection PyUnusedLocal
+    def __parse_h2(item: dict) -> dict:
+        return {
+            'open': '<h2 class="subheader">',
+            'close': '</h2>',
         }
 
     def __parse_img(self, item: dict) -> dict:
