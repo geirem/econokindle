@@ -9,6 +9,8 @@ p {
     margin: 0;
     padding: 0;
     text-indent: 10px;
+    orphans: 2;
+    widows: 3;
 }
 
 h1 {
@@ -32,11 +34,6 @@ h3 {
     text-indent: 0;
     margin: 1.5em;
     break-after: avoid-page;
-}
-
-p {
-    orphans: 2;
-    widows: 3;
 }
 
 h2.subheader {
