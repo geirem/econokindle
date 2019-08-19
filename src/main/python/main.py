@@ -17,6 +17,7 @@ from lib.Cache import Cache
 from lib.Fetcher import Fetcher
 from lib.KeyCreator import KeyCreator
 from lib.Parser import Parser
+from lib.ParsingStrategy import ParsingStrategy
 
 WORK = './cache/'
 RESOURCES = 'src/main/resources'
@@ -123,11 +124,12 @@ def main():
     issue = parse_root(root, key_creator)
     save_cover_image(issue, fetcher, key_creator)
     issue['title'] = 'The Economist - ' + issue['cover_title']
+    parsing_strategy = ParsingStrategy(key_creator, issue['references'])
     sections = issue['sections']
     for url in issue['urls']:
         print(f'Processing {url}...', end='')
         document = fetcher.fetch(url)
-        article = Parser(extract_script(document), key_creator, issue['references']).parse()
+        article = Parser(extract_script(document), key_creator, parsing_strategy).parse()
         for image_url in article['images']:
             fetcher.fetch_image(image_url)
         section = article['section']
@@ -141,6 +143,7 @@ def main():
     invoke_kindlegen(kindle_gen_binary(args), WORK)
     if os.path.isfile('/Volumes/Kindle'):
         copyfile(WORK + 'economist.mobi', '/Volumes/Kindle/documents/economist.mobi')
+    subprocess.call(args.sneaky)
 
 
 #NOSONAR
