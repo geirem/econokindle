@@ -3,7 +3,6 @@ import json
 import os
 import re
 import subprocess
-import time
 from collections import OrderedDict
 from shutil import copyfile
 from typing import Optional
