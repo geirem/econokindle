@@ -13,9 +13,8 @@ from lib import KeyCreator
 
 class ParsingStrategy:
 
-    def __init__(self, key_creator: KeyCreator, valid_references: list):
-        self.__images = []
-        self.__parsed_elements = []
+    def __init__(self, key_creator: KeyCreator, valid_references: list, images: list):
+        self.__images = images
         self.__key_creator = key_creator
         self.__valid_references = valid_references
         self.__parsers = {

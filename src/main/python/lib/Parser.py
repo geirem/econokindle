@@ -2,12 +2,13 @@ from typing import Optional
 
 from jsonpath_rw import parse
 
-from lib import KeyCreator, ParsingStrategy
+from lib import KeyCreator
+from lib.ParsingStrategy import ParsingStrategy
 
 
 class Parser:
 
-    def __init__(self, script: dict, key_creator: KeyCreator, parsing_strategy: ParsingStrategy):
+    def __init__(self, script: dict, key_creator: KeyCreator, issue: dict):
         candidates = parse('[*].response.canonical').find(script)
         for candidate in candidates:
             if 'url' in candidate.value:
@@ -17,7 +18,7 @@ class Parser:
         self.__parsed_elements = []
         self.__key_creator = key_creator
         self.__url_path = parse('image.main.url.canonical')
-        self.__parsing_strategy = parsing_strategy
+        self.__parsing_strategy = ParsingStrategy(key_creator, issue['references'], self.__images)
 
     def __extract_main_image(self) -> Optional[str]:
         url = self.__url_path.find(self.__script)

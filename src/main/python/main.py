@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+import platform
 import re
 import subprocess
 from collections import OrderedDict
@@ -23,26 +24,6 @@ RESOURCES = 'src/main/resources'
 file_loader = FileSystemLoader(RESOURCES)
 env = Environment(loader=file_loader)
 
-#PS C:\Users\o9c\IdeaProjects\econokindle> python.exe .\src\main\python\main.py
-#python.exe : Traceback (most recent call last):
-#At line:1 char:1
-#+ python.exe .\src\main\python\main.py
-#+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#    + CategoryInfo          : NotSpecified: (Traceback (most recent call last)::String) [], RemoteException
-#    + FullyQualifiedErrorId : NativeCommandError
-#
-#  File ".\src\main\python\main.py", line 153, in <module>
-#    main()
-#  File ".\src\main\python\main.py", line 118, in main
-#    front = fetcher.fetch('https://www.economist.com/')
-#  File "C:\Users\o9c\IdeaProjects\econokindle\src\main\python\lib\Fetcher.py", line 20, in fetch
-#    self.__cache.store(url, contents)
-#  File "C:\Users\o9c\IdeaProjects\econokindle\src\main\python\lib\Cache.py", line 58, in store
-#    writer.write(contents)
-#  File "C:\Program Files\Python\Python36\lib\encodings\cp1252.py", line 19, in encode
-#    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
-#UnicodeEncodeError: 'charmap' codec can't encode character '\u2192' in position 411747: character maps to <undefined>
-
 
 #NOSONAR
 def parse_args():
@@ -54,12 +35,14 @@ def parse_args():
 
 
 def kindle_gen_binary(args: argparse.Namespace) -> str:
-    if not args.kindle_gen:
-        return os.environ['HOME'] + '/bin/kindlegen'
-    kindle_gen = args.kindle_gen
-    if not os.path.isfile(kindle_gen) and not kindle_gen.endswith['/kindlegen']:
-        raise FileNotFoundError
-    return kindle_gen
+    if args.kindle_gen:
+        kindle_gen = args.kindle_gen
+        if not os.path.isfile(kindle_gen) and not kindle_gen.endswith['/kindlegen']:
+            raise FileNotFoundError
+        return kindle_gen
+    if platform.system() == 'Windows':
+        return 'C:/Program Files (x86)/kindlegen/kindlegen.exe'
+    return os.environ['HOME'] + '/bin/kindlegen'
 
 
 def max_cache_age(args: argparse.Namespace) -> int:
@@ -143,12 +126,11 @@ def main():
     issue = parse_root(root, key_creator)
     save_cover_image(issue, fetcher, key_creator)
     issue['title'] = 'The Economist - ' + issue['cover_title']
-    parsing_strategy = ParsingStrategy(key_creator, issue['references'])
     sections = issue['sections']
     for url in issue['urls']:
         print(f'Processing {url}...', end='')
         document = fetcher.fetch(url)
-        article = Parser(extract_script(document), key_creator, parsing_strategy).parse()
+        article = Parser(extract_script(document), key_creator, issue).parse()
         for image_url in article['images']:
             fetcher.fetch_image(image_url)
         section = article['section']
