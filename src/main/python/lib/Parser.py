@@ -1,22 +1,13 @@
 from typing import Optional
 
-from lib.TagParser import TagParser
-from lib.parsers.SpanParser import SpanParser
-from lib.parsers.ImgParser import ImgParser
-from lib.parsers.BrParser import BrParser
-from lib.parsers.IframeParser import IframeParser
-from lib.parsers.H2Parser import H2Parser
-from lib.parsers.FigureParser import FigureParser
-from lib.parsers.AParser import AParser
-
 from jsonpath_rw import parse
 
-from lib import KeyCreator
+from lib import KeyCreator, ParsingStrategy
 
 
 class Parser:
 
-    def __init__(self, script: dict, key_creator: KeyCreator, valid_references: list):
+    def __init__(self, script: dict, key_creator: KeyCreator, parsing_strategy: ParsingStrategy):
         candidates = parse('[*].response.canonical').find(script)
         for candidate in candidates:
             if 'url' in candidate.value:
@@ -26,17 +17,7 @@ class Parser:
         self.__parsed_elements = []
         self.__key_creator = key_creator
         self.__url_path = parse('image.main.url.canonical')
-        self.__valid_references = valid_references
-        self.__parsers = {
-            'span': SpanParser(key_creator, self.__images, valid_references),
-            'img': ImgParser(key_creator, self.__images, valid_references),
-            'br': BrParser(key_creator, self.__images, valid_references),
-            'iframe': IframeParser(key_creator, self.__images, valid_references),
-            'a': AParser(key_creator, self.__images, valid_references),
-            'h2': H2Parser(key_creator, self.__images, valid_references),
-            'figure': FigureParser(key_creator, self.__images, valid_references),
-        }
-        self.__default_parser = TagParser(key_creator, self.__images, valid_references)
+        self.__parsing_strategy = parsing_strategy
 
     def __extract_main_image(self) -> Optional[str]:
         url = self.__url_path.find(self.__script)
@@ -80,7 +61,7 @@ class Parser:
             if item['type'] == 'text':
                 self.__parsed_elements.append(item['data'])
             elif item['type'] == 'tag':
-                tag = self.__parsers.get(item['name'], self.__default_parser).parse(item)
+                tag = self.__parsing_strategy.get_parser(item).parse(item)
                 self.__parsed_elements.append(tag['open'])
                 self.__parse_article_body(item['children'])
                 self.__parsed_elements.append(tag['close'])

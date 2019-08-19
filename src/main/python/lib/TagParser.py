@@ -1,3 +1,5 @@
+from typing import Optional
+
 from lib import KeyCreator
 
 
@@ -14,3 +16,10 @@ class TagParser:
             'open': f'<{name}>',
             'close': f'</{name}>',
         }
+
+    def _look_at_next_tag(self, tag: dict) -> Optional[str]:
+        if 'children' not in tag:
+            return None
+        if tag['children']['type'] == 'text':
+            return 'text'
+        return tag['children']['name']

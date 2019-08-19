@@ -143,7 +143,6 @@ def main():
     invoke_kindlegen(kindle_gen_binary(args), WORK)
     if os.path.isfile('/Volumes/Kindle'):
         copyfile(WORK + 'economist.mobi', '/Volumes/Kindle/documents/economist.mobi')
-    subprocess.call(args.sneaky)
 
 
 #NOSONAR
