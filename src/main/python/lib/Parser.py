@@ -2,25 +2,22 @@ from typing import Optional
 
 from jsonpath_rw import parse
 
-from lib import KeyCreator
+from lib import KeyCreator, ParsingStrategy
 
 
 class Parser:
 
-    def __init__(self, script: dict, key_creator: KeyCreator, valid_references: list):
-        self.__script = parse('[*].response.canonical').find(script).pop().value
+    def __init__(self, script: dict, key_creator: KeyCreator, parsing_strategy: ParsingStrategy):
+        candidates = parse('[*].response.canonical').find(script)
+        for candidate in candidates:
+            if 'url' in candidate.value:
+                self.__script = candidate.value
+                break
         self.__images = []
         self.__parsed_elements = []
         self.__key_creator = key_creator
         self.__url_path = parse('image.main.url.canonical')
-        self.__valid_references = valid_references
-        self.TAG_PARSERS = {
-            'span': self.__parse_span,
-            'img': self.__parse_img,
-            'br': self.__parse_br,
-            'iframe': self.__parse_iframe,
-            'a': self.__parse_a,
-        }
+        self.__parsing_strategy = parsing_strategy
 
     def __extract_main_image(self) -> Optional[str]:
         url = self.__url_path.find(self.__script)
@@ -64,72 +61,10 @@ class Parser:
             if item['type'] == 'text':
                 self.__parsed_elements.append(item['data'])
             elif item['type'] == 'tag':
-                tag = self.TAG_PARSERS.get(item['name'], self.__parse__default)(item)
+                tag = self.__parsing_strategy.get_parser(item).parse(item)
                 self.__parsed_elements.append(tag['open'])
                 self.__parse_article_body(item['children'])
                 self.__parsed_elements.append(tag['close'])
-
-    def __parse_a(self, item: dict) -> dict:
-        attributes = item['attribs']
-        href = self.__key_creator.key(attributes['href'])
-        # Hack to support references to articles in other issues.
-        tag = { 'close': '</a>'}
-        if href in self.__valid_references:
-            tag['open'] = f'<a href="#{href}">'
-        else:
-            href = attributes['href']
-            tag['open'] = f'<a href="{href}">online '
-        return tag
-
-    # noinspection PyUnusedLocal
-    @staticmethod
-    def __parse_br(item: dict) -> dict:
-        return {
-            'open': '<br/>',
-            'close': '',
-        }
-
-    # noinspection PyUnusedLocal
-    @staticmethod
-    def __parse__default(item: dict) -> dict:
-        name = item['name']
-        return {
-            'open': '<' + name + '>',
-            'close': '</' + name + '>',
-        }
-
-    # noinspection PyUnusedLocal
-    @staticmethod
-    def __parse_iframe(item: dict) -> dict:
-        return {
-            'open': '',
-            'close': '',
-        }
-
-    @staticmethod
-    def __parse_span(item: dict) -> dict:
-        attributes = item['attribs']
-        if 'data-caps' in attributes and attributes['data-caps'] == 'initial':
-            return {
-                'open': '<span class="dropcaps">',
-                'close': '</span>',
-            }
-        return {
-            'open': '<span>',
-            'close': '</span>',
-        }
-
-    def __parse_img(self, item: dict) -> dict:
-        attributes = item['attribs']
-        src = attributes['src']
-        name = self.__key_creator.key(src)
-        self.__images.append(src)
-        height = attributes['height']
-        width = attributes['width']
-        return {
-            'open': f'<img alt="" src="{name}" height="{height}" width="{width}"/>',
-            'close': '',
-        }
 
     @staticmethod
     def __apply_html_entities(processed: Optional[str]) -> str:

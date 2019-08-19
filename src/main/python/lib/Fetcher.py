@@ -1,3 +1,5 @@
+import time
+
 import urllib3
 
 from lib.Cache import Cache
@@ -13,6 +15,7 @@ class Fetcher:
         cached = self.__cache.get(url)
         if cached is not None:
             return cached
+        time.sleep(6) # Throttle downloads.
         result = self.__pool_manager.request("GET", url)
         if result.status != 200:
             raise Exception
