@@ -29,6 +29,8 @@ class Cache:
         file_info = os.stat(key)
         if self.__now - file_info.st_mtime > self.__max_age:
             return False
+        if file_info.st_size == 0:
+            return False
         return True
 
     def __key(self, document: str) -> str:
@@ -39,7 +41,7 @@ class Cache:
         if not self.has(key):
             return None
         data = ''
-        with open(key, 'r') as fp:
+        with open(key, 'r', encoding='utf-8') as fp:
             for line in fp:
                 data += line.strip()
         return data
@@ -54,7 +56,7 @@ class Cache:
                         break
                     out.write(data)
         else:
-            with open(key, 'w') as writer:
+            with open(key, 'w', encoding='utf-8') as writer:
                 writer.write(contents)
 
     @staticmethod

@@ -20,6 +20,9 @@ class TagParser:
     def _look_at_next_tag(self, tag: dict) -> Optional[str]:
         if 'children' not in tag:
             return None
-        if tag['children']['type'] == 'text':
+        children = tag['children']
+        if len(children) == 0:
+            return None
+        if children[0]['type'] == 'text':
             return 'text'
-        return tag['children']['name']
+        return children[0]['name']
