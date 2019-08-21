@@ -1,5 +1,4 @@
 import unittest
-from unittest.mock import MagicMock
 
 import urllib3
 
@@ -28,3 +27,13 @@ class FetcherTest(unittest.TestCase):
 
     def test_that_we_skip_download_on_cache_hit(self):
         self.__fetcher = Fetcher(self.__pool, self.__cache)
+
+
+if __name__ == '__main__':
+    import xmlrunner
+
+    unittest.main(
+        testRunner=xmlrunner.XMLTestRunner(output='test-reports'),
+        failfast=False,
+        buffer=False,
+        catchbreak=False)
