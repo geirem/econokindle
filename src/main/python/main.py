@@ -142,9 +142,15 @@ def main():
     render('opf.jinja', 'economist.opf', issue)
     copyfile(RESOURCES + '/style.css', WORK + 'style.css')
     invoke_kindlegen(kindle_gen_binary(args), WORK)
-    if os.path.isfile('/Volumes/Kindle'):
-        copyfile(WORK + 'economist.mobi', '/Volumes/Kindle/documents/economist.mobi')
+    load_to_kindle()
 
+
+def load_to_kindle() -> str:
+    if platform.system() == 'Windows':
+        if os.path.isfile('D:/documents'):
+            copyfile(WORK + 'economist.mobi', 'D:/documents/economist.mobi')
+    elif os.path.isfile('/Volumes/Kindle'):
+        copyfile(WORK + 'economist.mobi', '/Volumes/Kindle/documents/economist.mobi')
 
 #NOSONAR
 def invoke_kindlegen(kindle_gen: str, path: str) -> None:

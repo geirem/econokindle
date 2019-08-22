@@ -11,7 +11,7 @@
     <a name="{{ section['id'] }}"><h1>{{ section_name }}</h1></a>
     <ul>
         {% for article in section['articles'] -%}
-            <li><a href="#{{ article['id'] }}">{{ article['title'] }}</a></li>
+            <li><a style="text-decoration: none !important" href="#{{ article['id'] }}">{{ article['title'] }}</a></li>
         {% endfor -%}
     </ul>
     <mbp:pagebreak/>

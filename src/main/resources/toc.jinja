@@ -8,10 +8,10 @@
 <body>
 <div id="toc">
     {% for section_name, section in sections.items() -%}
-        <a class="toc" href="economist.html#{{ section['id'] }}"><h2>{{ section_name }}</h2></a>
+        <a style="text-decoration: none !important" href="economist.html#{{ section['id'] }}"><h2>{{ section_name }}</h2></a>
         <ul>
         {% for article in section['articles'] -%}
-            <li><div><a class="toc" href="economist.html#{{ article['id'] }}">{{ article['title'] }}</a></div></li>
+            <li><div><a style="text-decoration: none !important" href="economist.html#{{ article['id'] }}">{{ article['title'] }}</a></div></li>
         {% endfor -%}
         </ul>
     {% endfor -%}
