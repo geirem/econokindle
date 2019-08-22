@@ -61,6 +61,7 @@ def extract_script(document: str) -> Optional[dict]:
 def parse_root(document: str, key_creator: KeyCreator) -> dict:
     jscript = extract_script(document)
     name = ''
+    cover = parse('$..cover').find(jscript).pop().value.pop()
     canonical = parse('[*].response.canonical').find(jscript).pop().value
     for item in canonical:
         if item.startswith('_hasPart'):
@@ -68,7 +69,6 @@ def parse_root(document: str, key_creator: KeyCreator) -> dict:
             break
     if name == '':
         raise Exception
-    cover = canonical['image']['cover'][0]
     cover_url = cover['url']['canonical']
     cover_title = cover['headline']
     parts = canonical[name]['parts']
@@ -145,12 +145,13 @@ def main():
     load_to_kindle()
 
 
-def load_to_kindle() -> str:
+def load_to_kindle() -> None:
     if platform.system() == 'Windows':
         if os.path.isfile('D:/documents'):
             copyfile(WORK + 'economist.mobi', 'D:/documents/economist.mobi')
     elif os.path.isfile('/Volumes/Kindle'):
         copyfile(WORK + 'economist.mobi', '/Volumes/Kindle/documents/economist.mobi')
+
 
 #NOSONAR
 def invoke_kindlegen(kindle_gen: str, path: str) -> None:
