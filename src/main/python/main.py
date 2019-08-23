@@ -61,6 +61,7 @@ def extract_script(document: str) -> Optional[dict]:
 def parse_root(document: str, key_creator: KeyCreator) -> dict:
     jscript = extract_script(document)
     name = ''
+    cover = parse('$..cover').find(jscript).pop().value.pop()
     canonical = parse('[*].response.canonical').find(jscript).pop().value
     for item in canonical:
         if item.startswith('_hasPart'):
@@ -68,7 +69,6 @@ def parse_root(document: str, key_creator: KeyCreator) -> dict:
             break
     if name == '':
         raise Exception
-    cover = canonical['image']['cover'][0]
     cover_url = cover['url']['canonical']
     cover_title = cover['headline']
     parts = canonical[name]['parts']
@@ -79,12 +79,6 @@ def parse_root(document: str, key_creator: KeyCreator) -> dict:
         url = part['url']['canonical']
         urls.append(url)
         references.append(key_creator.key(url))
-        section = part['print']['section']['headline']
-        if section not in sections:
-            sections[section] = {
-                'articles': [],
-                'id': 'section_' + str(len(sections)),
-            }
     return {
         'cover_image_url': cover_url,
         'cover_title': cover_title,
@@ -134,6 +128,11 @@ def main():
         for image_url in article['images']:
             fetcher.fetch_image(image_url)
         section = article['section']
+        if section not in sections:
+            sections[section] = {
+                'articles': [],
+                'id': 'section_' + str(len(sections)),
+            }
         sections[section]['articles'].append(article)
         print('done.')
     render('toc.jinja', 'toc.html', issue)
@@ -142,8 +141,16 @@ def main():
     render('opf.jinja', 'economist.opf', issue)
     copyfile(RESOURCES + '/style.css', WORK + 'style.css')
     invoke_kindlegen(kindle_gen_binary(args), WORK)
-    if os.path.isfile('/Volumes/Kindle'):
-        copyfile(WORK + 'economist.mobi', '/Volumes/Kindle/documents/economist.mobi')
+    load_to_kindle()
+
+
+def load_to_kindle() -> None:
+    if platform.system() == 'Windows':
+        if os.path.isfile('D:/documents'):
+            copyfile(WORK + 'economist.mobi', 'D:/documents/economist.mobi')
+    else:
+        if os.path.isfile('/Volumes/Kindle'):
+            copyfile(WORK + 'economist.mobi', '/Volumes/Kindle/documents/economist.mobi')
 
 
 #NOSONAR
