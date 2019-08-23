@@ -10,5 +10,5 @@ class KeyCreator:
     def key(document: str) -> str:
         key = document.split('/').pop()
         if key == '' or key is None:
-            return 'index_' + str(datetime.date.today())
-        return key
+            key = 'index'
+        return str(datetime.date.today()) + '_' + key
