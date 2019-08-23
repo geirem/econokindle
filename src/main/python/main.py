@@ -18,6 +18,7 @@ from lib.Fetcher import Fetcher
 from lib.KeyCreator import KeyCreator
 from lib.Parser import Parser
 from lib.ParsingStrategy import ParsingStrategy
+from lib.Platform import Platform
 
 WORK = './cache/'
 RESOURCES = 'src/main/resources'
@@ -32,17 +33,6 @@ def parse_args():
     parser.add_argument('-a', '--max_age', help='Days before cached items are refreshed.  Default is five.')
     parser.add_argument('-k', '--kindle_gen', help='Path to "kindlegen" binary.  Default is ~/bin/kindlegen')
     return parser.parse_args()
-
-
-def kindle_gen_binary(args: argparse.Namespace) -> str:
-    if args.kindle_gen:
-        kindle_gen = args.kindle_gen
-        if not os.path.isfile(kindle_gen) and not kindle_gen.endswith['/kindlegen']:
-            raise FileNotFoundError
-        return kindle_gen
-    if platform.system() == 'Windows':
-        return 'C:/Program Files (x86)/kindlegen/kindlegen.exe'
-    return os.environ['HOME'] + '/bin/kindlegen'
 
 
 def max_cache_age(args: argparse.Namespace) -> int:
@@ -135,22 +125,10 @@ def main():
             }
         sections[section]['articles'].append(article)
         print('done.')
-    render('toc.jinja', 'toc.html', issue)
-    render('ncx.jinja', 'toc.ncx', issue)
-    render('book.jinja', 'economist.html', issue)
-    render('opf.jinja', 'economist.opf', issue)
+    render(issue)
     copyfile(RESOURCES + '/style.css', WORK + 'style.css')
-    invoke_kindlegen(kindle_gen_binary(args), WORK)
-    load_to_kindle()
-
-
-def load_to_kindle() -> None:
-    if platform.system() == 'Windows':
-        if os.path.isfile('D:/documents'):
-            copyfile(WORK + 'economist.mobi', 'D:/documents/economist.mobi')
-    else:
-        if os.path.isfile('/Volumes/Kindle'):
-            copyfile(WORK + 'economist.mobi', '/Volumes/Kindle/documents/economist.mobi')
+    invoke_kindlegen(Platform.kindle_gen_binary(args), WORK)
+    Platform.load_to_kindle(WORK)
 
 
 #NOSONAR
@@ -158,7 +136,14 @@ def invoke_kindlegen(kindle_gen: str, path: str) -> None:
     subprocess.call([kindle_gen, 'economist.opf'], cwd=path)
 
 
-def render(template: str, file: str, issue: dict) -> None:
+def render(issue: dict) -> None:
+    render_template('toc.jinja', 'toc.html', issue)
+    render_template('ncx.jinja', 'toc.ncx', issue)
+    render_template('book.jinja', 'economist.html', issue)
+    render_template('opf.jinja', 'economist.opf', issue)
+
+
+def render_template(template: str, file: str, issue: dict) -> None:
     sections = issue['sections']
     content = env.get_template(template).render(sections=sections, title=issue['title'], issue=issue)
     with open(WORK + file, 'wt') as writer:
