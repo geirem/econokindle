@@ -19,7 +19,7 @@ from econokindle.Parser import Parser
 from econokindle.Platform import Platform
 
 WORK = './cache/'
-RESOURCES = 'src/main/resources'
+RESOURCES = 'resources'
 file_loader = FileSystemLoader(RESOURCES)
 env = Environment(loader=file_loader)
 
