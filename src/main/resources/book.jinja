@@ -14,6 +14,9 @@
             <li><a style="text-decoration: none !important" href="#{{ article['id'] }}">{{ article['title'] }}</a></li>
         {% endfor -%}
     </ul>
+    {%  if 'next_pointer' in section -%}
+        <a style="bottom: 0; text-align: right" href="#{{ section['next_pointer'] }}">...next section</a>
+    {% endif -%}
     <mbp:pagebreak/>
     {% for article in section['articles'] -%}
         <a name="{{ article['id'] }}"><h3 itemprop="alternativeHeadline">{{ article['subheadline'] }}</h3></a>

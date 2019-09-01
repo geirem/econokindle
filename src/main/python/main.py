@@ -126,6 +126,14 @@ def main():
             }
         sections[section]['articles'].append(article)
         print('done.')
+    section_names = list(sections.keys())
+    i = 0
+    last_index = len(section_names)
+    while i < last_index:
+        current_name = section_names[i]
+        if i < last_index - 1:
+            sections[current_name]['next_pointer'] = sections[section_names[i+1]]['id']
+        i += 1
     render(issue)
     copyfile(RESOURCES + '/style.css', WORK + 'style.css')
     invoke_kindlegen(Platform.kindle_gen_binary(args), WORK)
