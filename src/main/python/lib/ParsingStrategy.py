@@ -3,6 +3,7 @@ from lib.TagParser import TagParser
 from lib.parsers.SpanParser import SpanParser
 from lib.parsers.ImgParser import ImgParser
 from lib.parsers.BrParser import BrParser
+from lib.parsers.PParser import PParser
 from lib.parsers.IframeParser import IframeParser
 from lib.parsers.H2Parser import H2Parser
 from lib.parsers.FigureParser import FigureParser
@@ -24,6 +25,7 @@ class ParsingStrategy:
             'iframe': IframeParser(key_creator, self.__images, valid_references),
             'a': AParser(key_creator, self.__images, valid_references),
             'h2': H2Parser(key_creator, self.__images, valid_references),
+            'p': PParser(key_creator, self.__images, valid_references),
             'figure': FigureParser(key_creator, self.__images, valid_references),
         }
         self.__default_parser = TagParser(key_creator, self.__images, valid_references)

@@ -17,12 +17,11 @@ class TagParser:
             'close': f'</{name}>',
         }
 
-    def _look_at_next_tag(self, tag: dict) -> Optional[str]:
+    @staticmethod
+    def _peek_at_first_child(tag: dict) -> Optional[dict]:
         if 'children' not in tag:
             return None
         children = tag['children']
         if len(children) == 0:
             return None
-        if children[0]['type'] == 'text':
-            return 'text'
-        return children[0]['name']
+        return children[0]
