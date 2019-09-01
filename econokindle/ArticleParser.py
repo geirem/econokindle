@@ -3,20 +3,21 @@ from typing import Optional
 from jsonpath_rw import parse
 
 from econokindle import KeyCreator
+from econokindle.DocumentParser import DocumentParser
 from econokindle.ParsingStrategy import ParsingStrategy
 
 
-class Parser:
+class ArticleParser(DocumentParser):
 
-    def __init__(self, script: dict, key_creator: KeyCreator, issue: dict):
-        candidates = parse('[*].response.canonical').find(script)
+    def __init__(self, document: str, key_creator: KeyCreator, issue: dict):
+        super().__init__(document, key_creator)
+        candidates = parse('[*].response.canonical').find(self._script)
         for candidate in candidates:
             if 'url' in candidate.value:
                 self.__script = candidate.value
                 break
         self.__images = []
         self.__parsed_elements = []
-        self.__key_creator = key_creator
         self.__url_path = parse('image.main.url.canonical')
         self.__parsing_strategy = ParsingStrategy(key_creator, issue['references'], self.__images)
 
@@ -38,12 +39,12 @@ class Parser:
                 return
 
     def parse(self) -> dict:
-        article_id = self.__key_creator.key(self.__script['url']['canonical'])
+        article_id = self._key_creator.key(self.__script['url']['canonical'])
         image = self.__extract_main_image()
         self.__start_body_parsing()
         if image:
             self.__images.append(image)
-            image = self.__key_creator.key(image)
+            image = self._key_creator.key(image)
         result = {
             'title': self.__apply_html_entities(self.__script['headline']),
             'text': self.__apply_html_entities(''.join(self.__parsed_elements)),

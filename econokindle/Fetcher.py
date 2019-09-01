@@ -11,7 +11,7 @@ class Fetcher:
         self.__pool_manager = pool_manager
         self.__cache = cache
 
-    def fetch(self, url: str) -> str:
+    def fetch_page(self, url: str) -> str:
         cached = self.__cache.get(url)
         if cached is not None:
             return cached

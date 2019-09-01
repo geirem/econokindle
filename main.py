@@ -1,22 +1,20 @@
 import argparse
 import datetime
-import json
 import re
 import subprocess
-from collections import OrderedDict
 from shutil import copyfile
-from typing import Optional
 
 import certifi
 import urllib3
 from jinja2 import Environment, FileSystemLoader
-from jsonpath_rw import parse
 
+from econokindle.ArticleParser import ArticleParser
 from econokindle.Cache import Cache
 from econokindle.Fetcher import Fetcher
+from econokindle.IndexParser import IndexParser
 from econokindle.KeyCreator import KeyCreator
-from econokindle.Parser import Parser
 from econokindle.Platform import Platform
+from econokindle.RootParser import RootParser
 
 WORK = './cache/'
 RESOURCES = 'resources'
@@ -39,57 +37,11 @@ def max_cache_age(args: argparse.Namespace) -> int:
     return int(args.max_age)
 
 
-def extract_script(document: str) -> Optional[dict]:
-    script = re.findall('<script id="preloadedData" type="application/json">.+?</script>', document.replace('\n', ''))
-    script = script.pop().replace('<script id="preloadedData" type="application/json">', '')
-    script = script.replace('</script>', '')
-    return json.loads(script)
-
-
-def parse_root(document: str, key_creator: KeyCreator) -> dict:
-    jscript = extract_script(document)
-    name = ''
-    cover = parse('$..cover').find(jscript).pop().value.pop()
-    canonical = parse('[*].response.canonical').find(jscript).pop().value
-    for item in canonical:
-        if item.startswith('_hasPart'):
-            name = item
-            break
-    if name == '':
-        raise Exception
-    cover_url = cover['url']['canonical']
-    cover_title = cover['headline']
-    parts = canonical[name]['parts']
-    urls = []
-    references = []
-    sections = OrderedDict()
-    for part in parts:
-        url = part['url']['canonical']
-        urls.append(url)
-        references.append(key_creator.key(url))
-    return {
-        'cover_image_url': cover_url,
-        'cover_title': cover_title,
-        'sections': sections,
-        'urls': urls,
-        'references': references,
-    }
-
-
 def save_cover_image(issue: dict, fetcher: Fetcher, key_creator: KeyCreator) -> None:
     url = issue['cover_image_url']
     fetcher.fetch_image(url)
     cover_image_name = key_creator.key(url)
     issue['cover_image_name'] = cover_image_name
-
-
-def parse_index(script: dict) -> str:
-    for item in script:
-        if 'canonical' not in item['response']:
-            continue
-        for sub_item, value in item['response']['canonical'].items():
-            if sub_item.startswith('_hasPart'):
-                return value['parts'][0]['url']['canonical']
 
 
 def main():
@@ -99,31 +51,46 @@ def main():
     cache = Cache(WORK, max_cache_age(args), key_creator)
     fetcher = Fetcher(pool_manager, cache)
     if args.edition and len(args.edition) <= 10 and re.search('^\\d{1,2}-\\d{1,2}-\\d{4}$', args.edition):
-        issue_pointer = 'https://www.economist.com/printedition/' + args.edition
+        issue_url = 'https://www.economist.com/printedition/' + args.edition
     else:
-        front = fetcher.fetch('https://www.economist.com/')
-        front_script = extract_script(front)
-        issue_pointer = parse_index(front_script)
-    edition = issue_pointer.split('/').pop()
-    root = fetcher.fetch(issue_pointer)
-    issue = parse_root(root, key_creator)
+        front_url = 'https://www.economist.com/'
+        print(f'Processing {front_url}...', end='')
+        front = fetcher.fetch_page(front_url)
+        root_parser = RootParser(front, key_creator)
+        issue_url = root_parser.parse()['issue_url']
+        print('done.')
+    edition = issue_url.split('/').pop()
+    root = fetcher.fetch_page(issue_url)
+    issue = IndexParser(root, key_creator).parse()
     save_cover_image(issue, fetcher, key_creator)
     issue['title'] = 'The Economist - ' + issue['cover_title']
-    sections = issue['sections']
     for url in issue['urls']:
         print(f'Processing {url}...', end='')
-        document = fetcher.fetch(url)
-        article = Parser(extract_script(document), key_creator, issue).parse()
+        article = ArticleParser(fetcher.fetch_page(url), key_creator, issue).parse()
         for image_url in article['images']:
             fetcher.fetch_image(image_url)
-        section = article['section']
-        if section not in sections:
-            sections[section] = {
-                'articles': [],
-                'id': 'section_' + str(len(sections)),
-            }
-        sections[section]['articles'].append(article)
+        add_article_to_issue(issue, article)
         print('done.')
+    add_section_links(issue)
+    render(issue)
+    copyfile(RESOURCES + '/style.css', WORK + 'style.css')
+    invoke_kindlegen(Platform.kindle_gen_binary(args), WORK)
+    Platform.load_to_kindle(WORK, edition)
+
+
+def add_article_to_issue(issue: dict, article: dict) -> None:
+    sections = issue['sections']
+    section = article['section']
+    if section not in sections:
+        sections[section] = {
+            'articles': [],
+            'id': 'section_' + str(len(sections)),
+        }
+    sections[section]['articles'].append(article)
+
+
+def add_section_links(issue: dict) -> None:
+    sections = issue['sections']
     section_names = list(sections.keys())
     i = 0
     last_index = len(section_names)
@@ -132,10 +99,6 @@ def main():
         if i < last_index - 1:
             sections[current_name]['next_pointer'] = sections[section_names[i+1]]['id']
         i += 1
-    render(issue)
-    copyfile(RESOURCES + '/style.css', WORK + 'style.css')
-    invoke_kindlegen(Platform.kindle_gen_binary(args), WORK)
-    Platform.load_to_kindle(WORK, edition)
 
 
 #NOSONAR
