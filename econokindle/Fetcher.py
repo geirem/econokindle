@@ -23,9 +23,13 @@ class Fetcher:
         self.__cache.store(url, contents)
         return contents
 
-    def fetch_image(self, url: str) -> None:
-        cached = self.__cache.has(url)
+    def fetch_images(self, image_urls: str) -> None:
+        for image in image_urls:
+            self.fetch_image(image)
+
+    def fetch_image(self, image_url: str) -> None:
+        cached = self.__cache.has(image_url)
         if cached:
             return
-        r = self.__pool_manager.request('GET', url, preload_content=False)
-        self.__cache.store(url, r)
+        r = self.__pool_manager.request('GET', image_url, preload_content=False)
+        self.__cache.store(image_url, r)

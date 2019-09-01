@@ -37,11 +37,18 @@ def max_cache_age(args: argparse.Namespace) -> int:
     return int(args.max_age)
 
 
-def save_cover_image(issue: dict, fetcher: Fetcher, key_creator: KeyCreator) -> None:
-    url = issue['cover_image_url']
-    fetcher.fetch_image(url)
-    cover_image_name = key_creator.key(url)
-    issue['cover_image_name'] = cover_image_name
+def fetch_issue_url(fetcher: Fetcher, key_creator: KeyCreator, **kwargs: dict) -> str:
+    front_url = 'https://www.economist.com/'
+    if 'edition' in kwargs and kwargs['edition']:
+        edition = str(kwargs['edition'])
+        if re.search('^\\d{4}-\\d{2}-\\d{2}$', edition):
+            return front_url + 'printedition/' + edition
+        else:
+            raise SyntaxError('Invalid edition date format.')
+    print(f'Processing {front_url}...', end='')
+    issue_url = RootParser(fetcher.fetch_page(front_url), key_creator).parse()['issue_url']
+    print('done.')
+    return issue_url
 
 
 def main():
@@ -50,32 +57,26 @@ def main():
     key_creator = KeyCreator(str(datetime.date.today()))
     cache = Cache(WORK, max_cache_age(args), key_creator)
     fetcher = Fetcher(pool_manager, cache)
-    if args.edition and len(args.edition) <= 10 and re.search('^\\d{1,2}-\\d{1,2}-\\d{4}$', args.edition):
-        issue_url = 'https://www.economist.com/printedition/' + args.edition
-    else:
-        front_url = 'https://www.economist.com/'
-        print(f'Processing {front_url}...', end='')
-        front = fetcher.fetch_page(front_url)
-        root_parser = RootParser(front, key_creator)
-        issue_url = root_parser.parse()['issue_url']
-        print('done.')
-    edition = issue_url.split('/').pop()
-    root = fetcher.fetch_page(issue_url)
-    issue = IndexParser(root, key_creator).parse()
-    save_cover_image(issue, fetcher, key_creator)
-    issue['title'] = 'The Economist - ' + issue['cover_title']
-    for url in issue['urls']:
-        print(f'Processing {url}...', end='')
-        article = ArticleParser(fetcher.fetch_page(url), key_creator, issue).parse()
-        for image_url in article['images']:
-            fetcher.fetch_image(image_url)
-        add_article_to_issue(issue, article)
-        print('done.')
+    issue_url = fetch_issue_url(fetcher, key_creator, edition=args.edition)
+    print(f'Processing {issue_url}...', end='')
+    issue = IndexParser(fetcher.fetch_page(issue_url), key_creator).parse()
+    fetcher.fetch_image(issue['cover_image_url'])
+    print('done.')
+    process_articles_in_issue(fetcher, key_creator, issue)
     add_section_links(issue)
     render(issue)
     copyfile(RESOURCES + '/style.css', WORK + 'style.css')
     invoke_kindlegen(Platform.kindle_gen_binary(args), WORK)
-    Platform.load_to_kindle(WORK, edition)
+    Platform.load_to_kindle(WORK, issue)
+
+
+def process_articles_in_issue(fetcher: Fetcher, key_creator: KeyCreator, issue: dict):
+    for url in issue['urls']:
+        print(f'Processing {url}...', end='')
+        article = ArticleParser(fetcher.fetch_page(url), key_creator, issue).parse()
+        fetcher.fetch_images(article['images'])
+        add_article_to_issue(issue, article)
+        print('done.')
 
 
 def add_article_to_issue(issue: dict, article: dict) -> None:

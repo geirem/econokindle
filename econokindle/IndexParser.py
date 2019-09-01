@@ -18,6 +18,8 @@ class IndexParser(DocumentParser):
             raise Exception
         cover_url = cover['url']['canonical']
         cover_title = cover['headline']
+        self_url = canonical['url']['canonical']
+        edition = self_url.split('/').pop()
         parts = canonical[name]['parts']
         urls = []
         references = []
@@ -32,5 +34,8 @@ class IndexParser(DocumentParser):
             'sections': sections,
             'urls': urls,
             'references': references,
+            'cover_image_name': self._key_creator.key(cover_url),
+            'edition': edition,
+            'title': 'The Economist - ' + cover_title,
         }
 
