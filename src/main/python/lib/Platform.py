@@ -21,10 +21,12 @@ class Platform:
         return os.environ['HOME'] + '/bin/kindlegen'
 
     @staticmethod
-    def load_to_kindle(work: str) -> None:
+    def load_to_kindle(work: str, edition: str) -> None:
+        cached_name = work + 'economist.mobi'
         if platform.system() == 'Windows':
-            if os.path.isfile('D:/documents'):
-                copyfile(work + 'economist.mobi', 'D:/documents/economist.mobi')
+            root = 'D:/documents/'
         else:
-            if os.path.isfile('/Volumes/Kindle'):
-                copyfile(work + 'economist.mobi', '/Volumes/Kindle/documents/economist.mobi')
+            root = '/Volumes/Kindle/documents/'
+        target_name = root + edition + '_economist.mobi'
+        if os.path.isfile(root):
+            copyfile(cached_name, target_name)

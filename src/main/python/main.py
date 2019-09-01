@@ -106,6 +106,7 @@ def main():
         front = fetcher.fetch('https://www.economist.com/')
         front_script = extract_script(front)
         issue_pointer = parse_index(front_script)
+    edition = issue_pointer.split('/').pop()
     root = fetcher.fetch(issue_pointer)
     issue = parse_root(root, key_creator)
     save_cover_image(issue, fetcher, key_creator)
@@ -128,7 +129,7 @@ def main():
     render(issue)
     copyfile(RESOURCES + '/style.css', WORK + 'style.css')
     invoke_kindlegen(Platform.kindle_gen_binary(args), WORK)
-    Platform.load_to_kindle(WORK)
+    Platform.load_to_kindle(WORK, edition)
 
 
 #NOSONAR
