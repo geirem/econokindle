@@ -2,7 +2,7 @@ import time
 
 import urllib3
 
-from lib.Cache import Cache
+from econokindle.Cache import Cache
 
 
 class Fetcher:

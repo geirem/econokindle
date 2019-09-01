@@ -2,8 +2,8 @@ from typing import Optional
 
 from jsonpath_rw import parse
 
-from lib import KeyCreator
-from lib.ParsingStrategy import ParsingStrategy
+from econokindle import KeyCreator
+from econokindle.ParsingStrategy import ParsingStrategy
 
 
 class Parser:

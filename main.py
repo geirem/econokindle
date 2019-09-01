@@ -1,7 +1,6 @@
 import argparse
+import datetime
 import json
-import os
-import platform
 import re
 import subprocess
 from collections import OrderedDict
@@ -13,12 +12,11 @@ import urllib3
 from jinja2 import Environment, FileSystemLoader
 from jsonpath_rw import parse
 
-from lib.Cache import Cache
-from lib.Fetcher import Fetcher
-from lib.KeyCreator import KeyCreator
-from lib.Parser import Parser
-from lib.ParsingStrategy import ParsingStrategy
-from lib.Platform import Platform
+from econokindle.Cache import Cache
+from econokindle.Fetcher import Fetcher
+from econokindle.KeyCreator import KeyCreator
+from econokindle.Parser import Parser
+from econokindle.Platform import Platform
 
 WORK = './cache/'
 RESOURCES = 'src/main/resources'
@@ -97,7 +95,7 @@ def parse_index(script: dict) -> str:
 def main():
     args = parse_args()
     pool_manager = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
-    key_creator = KeyCreator()
+    key_creator = KeyCreator(str(datetime.date.today()))
     cache = Cache(WORK, max_cache_age(args), key_creator)
     fetcher = Fetcher(pool_manager, cache)
     if args.edition and len(args.edition) <= 10 and re.search('^\\d{1,2}-\\d{1,2}-\\d{4}$', args.edition):

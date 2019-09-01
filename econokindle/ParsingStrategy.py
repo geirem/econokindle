@@ -1,15 +1,15 @@
 
-from lib.TagParser import TagParser
-from lib.parsers.SpanParser import SpanParser
-from lib.parsers.ImgParser import ImgParser
-from lib.parsers.BrParser import BrParser
-from lib.parsers.PParser import PParser
-from lib.parsers.IframeParser import IframeParser
-from lib.parsers.H2Parser import H2Parser
-from lib.parsers.FigureParser import FigureParser
-from lib.parsers.AParser import AParser
+from econokindle.TagParser import TagParser
+from econokindle.parsers.SpanParser import SpanParser
+from econokindle.parsers.ImgParser import ImgParser
+from econokindle.parsers.BrParser import BrParser
+from econokindle.parsers.PParser import PParser
+from econokindle.parsers.IframeParser import IframeParser
+from econokindle.parsers.H2Parser import H2Parser
+from econokindle.parsers.FigureParser import FigureParser
+from econokindle.parsers.AParser import AParser
 
-from lib import KeyCreator
+from econokindle import KeyCreator
 
 
 class ParsingStrategy:

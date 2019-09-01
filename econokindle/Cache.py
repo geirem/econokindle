@@ -3,7 +3,7 @@ import os.path
 import time
 from typing import Optional, Any
 
-from lib import KeyCreator
+from econokindle import KeyCreator
 
 
 class Cache:

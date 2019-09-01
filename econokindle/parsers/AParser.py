@@ -1,5 +1,4 @@
-from lib import KeyCreator
-from lib.TagParser import TagParser
+from econokindle.TagParser import TagParser
 
 
 class AParser(TagParser):

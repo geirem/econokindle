@@ -1,4 +1,4 @@
-from lib.TagParser import TagParser
+from econokindle.TagParser import TagParser
 
 
 class BrParser(TagParser):

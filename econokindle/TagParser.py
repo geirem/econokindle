@@ -1,6 +1,6 @@
 from typing import Optional
 
-from lib import KeyCreator
+from econokindle import KeyCreator
 
 
 class TagParser:
