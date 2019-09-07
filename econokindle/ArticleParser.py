@@ -2,15 +2,15 @@ from typing import Optional
 
 from jsonpath_rw import parse
 
-from econokindle import KeyCreator, Issue
+from econokindle import KeyCreator, Issue, Article
 from econokindle.DocumentParser import DocumentParser
 from econokindle.ParsingStrategy import ParsingStrategy
 
 
 class ArticleParser(DocumentParser):
 
-    def __init__(self, document: str, key_creator: KeyCreator, issue: Issue):
-        super().__init__(document, key_creator)
+    def __init__(self, document: str, article: Article, issue: Issue):
+        super().__init__(document, issue)
         candidates = parse('[*].response.canonical').find(self._script)
         for candidate in candidates:
             if 'url' in candidate.value:
@@ -19,7 +19,9 @@ class ArticleParser(DocumentParser):
         self.__images = []
         self.__parsed_elements = []
         self.__url_path = parse('image.main.url.canonical')
-        self.__parsing_strategy = ParsingStrategy(key_creator, issue.get_references(), self.__images)
+        self.__article = article
+        self.__issue = issue
+        self.__parsing_strategy = ParsingStrategy(issue, article)
 
     def __extract_main_image(self) -> Optional[str]:
         url = self.__url_path.find(self.__script)
@@ -38,26 +40,23 @@ class ArticleParser(DocumentParser):
                 self.__parse_article_body(self.__script[item])
                 return
 
-    def parse(self) -> dict:
-        article_id = self._key_creator.key(self.__script['url']['canonical'])
+    def parse(self) -> None:
+        self.__article.set_url(self.__script['url']['canonical'])
         image = self.__extract_main_image()
         self.__start_body_parsing()
         if image:
-            self.__images.append(image)
-            image = self._key_creator.key(image)
-        result = {
-            'title': self.__apply_html_entities(self.__script['headline']),
-            'text': self.__apply_html_entities(''.join(self.__parsed_elements)),
-            'section': self.__apply_html_entities(self.__script['print']['section']['headline']),
-            'subheadline': self.__apply_html_entities(self.__script['subheadline']),
-            'description': self.__apply_html_entities(self.__script['description']),
-            'dateline': self.__apply_html_entities(self.__script['dateline']),
-            'image': image,
-            'images': self.__images,
-            'id': article_id,
-            'external_articles': self.__parsing_strategy.get_external_articles(),
-        }
-        return result
+            self.__article.set_image()
+        self.__article.set_title(self.__apply_html_entities(self.__script['headline']))
+        self.__article.set_text(self.__apply_html_entities(''.join(self.__parsed_elements)))
+        self.__article.set_subheadline(self.__apply_html_entities(self.__script['subheadline']))
+        self.__article.set_description(self.__apply_html_entities(self.__script['description']))
+        self.__article.set_dateline(self.__apply_html_entities(self.__script['dateline']))
+        self.__issue.add_article_to_section(self.__apply_html_entities(self.__script['print']['section']['headline']), self.__article)
+        # result = {
+            # 'image': image,
+            # 'images': self.__images,
+            # 'external_articles': self.__parsing_strategy.get_external_articles(),
+        # }
 
     def __parse_article_body(self, element: dict) -> None:
         for item in element:

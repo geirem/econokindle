@@ -1,15 +1,15 @@
 from typing import Optional
 
-from econokindle import KeyCreator
+from econokindle import Article, Issue
 
 
 class TagParser:
 
-    def __init__(self, key_creator: KeyCreator, images: list, valid_references: list, external_articles: list):
-        self._key_creator = key_creator
-        self._images = images
-        self._valid_references = valid_references
-        self._external_articles = external_articles
+    _supports = '*'
+
+    def __init__(self, issue: Issue, article: Article):
+        self._issue = issue
+        self._article = article
 
     def parse(self, tag: dict) -> dict:
         name = tag['name']
@@ -26,3 +26,6 @@ class TagParser:
         if len(children) == 0:
             return None
         return children[0]
+
+    def supports(self):
+        return self._supports

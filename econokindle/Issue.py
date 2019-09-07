@@ -96,13 +96,13 @@ class Issue:
             article = Article(self.__fetcher, self.__key_creator)
             ArticleParser(self.__fetcher.fetch_page(url), article, self).parse()
             self.__fetcher.fetch_images(article['images'])
-            self.__add_article_to_issue(article)
+            # self.__add_article_to_issue(article)
             # add_articles_to_appendix(fetcher, key_creator, issue, article)
             print('done.')
 
-    def __add_article_to_issue(self, article: Article) -> None:
+    def add_article_to_section(self, section: str, article: Article) -> None:
         sections = self.__structure['sections']
-        section = article['section']
+        # section = article['section']
         if section not in sections:
             sections[section] = {
                 'articles': [],
