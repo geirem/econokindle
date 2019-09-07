@@ -3,6 +3,7 @@ from collections import OrderedDict
 import re
 
 from econokindle import Fetcher
+from econokindle.Article import Article
 from econokindle.ArticleParser import ArticleParser
 from econokindle.IndexParser import IndexParser
 from econokindle.KeyCreator import KeyCreator
@@ -92,13 +93,14 @@ class Issue:
     def __process_articles(self) -> None:
         for url in self.__structure['urls']:
             print(f'Processing {url}...', end='')
-            article = ArticleParser(self.__fetcher.fetch_page(url), self.get_key_creator(), self).parse()
+            article = Article(self.__fetcher, self.__key_creator)
+            ArticleParser(self.__fetcher.fetch_page(url), article, self).parse()
             self.__fetcher.fetch_images(article['images'])
             self.__add_article_to_issue(article)
-            add_articles_to_appendix(fetcher, key_creator, issue, article)
+            # add_articles_to_appendix(fetcher, key_creator, issue, article)
             print('done.')
 
-    def __add_article_to_issue(self, article: dict) -> None:
+    def __add_article_to_issue(self, article: Article) -> None:
         sections = self.__structure['sections']
         section = article['section']
         if section not in sections:

@@ -10,11 +10,9 @@ from jinja2 import Environment, FileSystemLoader
 from econokindle.ArticleParser import ArticleParser
 from econokindle.Cache import Cache
 from econokindle.Fetcher import Fetcher
-from econokindle.IndexParser import IndexParser
 from econokindle.Issue import Issue
 from econokindle.KeyCreator import KeyCreator
 from econokindle.Platform import Platform
-from econokindle.RootParser import RootParser
 
 WORK = './cache/'
 RESOURCES = 'resources'
