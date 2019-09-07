@@ -11,11 +11,11 @@ class AParser(TagParser):
         if href in self._valid_references:
             tag['open'] = f'<a href="#{href}">'
         else:
-            href = attributes['href']
+            self._external_articles.append(attributes['href'])
             next_child = self._peek_at_first_child(item)
             if next_child['data'] == 'article':
-                tag['open'] = f'<a href="{href}">online '
+                tag['open'] = f'<a href="{href}">appendix '
             else:
                 tag['open'] = f'<a href="{href}">'
-                tag['close'] = ' (online)</a>'
+                tag['close'] = ' (appendix)</a>'
         return tag

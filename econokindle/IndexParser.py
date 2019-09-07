@@ -37,5 +37,6 @@ class IndexParser(DocumentParser):
             'cover_image_name': self._key_creator.key(cover_url),
             'edition': edition,
             'title': 'The Economist - ' + cover_title,
+            'appendix': [],
         }
 

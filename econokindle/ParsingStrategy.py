@@ -17,18 +17,21 @@ class ParsingStrategy:
     def __init__(self, key_creator: KeyCreator, valid_references: list, images: list):
         self.__images = images
         self.__key_creator = key_creator
-        self.__valid_references = valid_references
+        self.__external_articles = []
         self.__parsers = {
-            'span': SpanParser(key_creator, self.__images, valid_references),
-            'img': ImgParser(key_creator, self.__images, valid_references),
-            'br': BrParser(key_creator, self.__images, valid_references),
-            'iframe': IframeParser(key_creator, self.__images, valid_references),
-            'a': AParser(key_creator, self.__images, valid_references),
-            'h2': H2Parser(key_creator, self.__images, valid_references),
-            'p': PParser(key_creator, self.__images, valid_references),
-            'figure': FigureParser(key_creator, self.__images, valid_references),
+            'span': SpanParser(key_creator, self.__images, valid_references, self.__external_articles),
+            'img': ImgParser(key_creator, self.__images, valid_references, self.__external_articles),
+            'br': BrParser(key_creator, self.__images, valid_references, self.__external_articles),
+            'iframe': IframeParser(key_creator, self.__images, valid_references, self.__external_articles),
+            'a': AParser(key_creator, self.__images, valid_references, self.__external_articles),
+            'h2': H2Parser(key_creator, self.__images, valid_references, self.__external_articles),
+            'p': PParser(key_creator, self.__images, valid_references, self.__external_articles),
+            'figure': FigureParser(key_creator, self.__images, valid_references, self.__external_articles),
         }
-        self.__default_parser = TagParser(key_creator, self.__images, valid_references)
+        self.__default_parser = TagParser(key_creator, self.__images, valid_references, self.__external_articles)
 
     def get_parser(self, tag: dict) -> TagParser:
         return self.__parsers.get(tag['name'], self.__default_parser)
+
+    def get_external_articles(self):
+        return self.__external_articles

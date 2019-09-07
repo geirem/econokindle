@@ -9,7 +9,7 @@ from econokindle.ParsingStrategy import ParsingStrategy
 
 class ArticleParser(DocumentParser):
 
-    def __init__(self, document: str, key_creator: KeyCreator, issue: dict):
+    def __init__(self, document: str, key_creator: KeyCreator, issue: dict, self_link: str):
         super().__init__(document, key_creator)
         candidates = parse('[*].response.canonical').find(self._script)
         for candidate in candidates:
@@ -20,6 +20,7 @@ class ArticleParser(DocumentParser):
         self.__parsed_elements = []
         self.__url_path = parse('image.main.url.canonical')
         self.__parsing_strategy = ParsingStrategy(key_creator, issue['references'], self.__images)
+        self.__self_link = self_link
 
     def __extract_main_image(self) -> Optional[str]:
         url = self.__url_path.find(self.__script)
@@ -46,6 +47,7 @@ class ArticleParser(DocumentParser):
             self.__images.append(image)
             image = self._key_creator.key(image)
         result = {
+            'self_link': self.__self_link,
             'title': self.__apply_html_entities(self.__script['headline']),
             'text': self.__apply_html_entities(''.join(self.__parsed_elements)),
             'section': self.__apply_html_entities(self.__script['print']['section']['headline']),
@@ -55,6 +57,7 @@ class ArticleParser(DocumentParser):
             'image': image,
             'images': self.__images,
             'id': article_id,
+            'external_articles': self.__parsing_strategy.get_external_articles(),
         }
         return result
 

@@ -52,30 +52,45 @@ def process_issue(fetcher: Fetcher, key_creator: KeyCreator, args: argparse.Name
     print('done.')
     process_articles_in_issue(fetcher, key_creator, issue)
     add_section_links(issue)
+    process_appendix(fetcher, key_creator, issue)
     render(issue)
     copyfile(RESOURCES + '/style.css', WORK + 'style.css')
     invoke_kindlegen(Platform.kindle_gen_binary(args), WORK)
     Platform.load_to_kindle(WORK, issue)
 
 
-def process_articles_in_issue(fetcher: Fetcher, key_creator: KeyCreator, issue: dict):
+def process_articles_in_issue(fetcher: Fetcher, key_creator: KeyCreator, issue: dict) -> None:
     for url in issue['urls']:
-        print(f'Processing {url}...', end='')
-        article = ArticleParser(fetcher.fetch_page(url), key_creator, issue).parse()
-        fetcher.fetch_images(article['images'])
-        add_article_to_issue(issue, article)
-        print('done.')
+        process_article(fetcher, key_creator, issue, url)
+
+
+def process_article(fetcher: Fetcher, key_creator: KeyCreator, issue: dict, url: str) -> None:
+    print(f'Processing {url}...', end='')
+    article = ArticleParser(fetcher.fetch_page(url), key_creator, issue, url).parse()
+    fetcher.fetch_images(article['images'])
+    add_article_to_issue(issue, article)
+    print('done.')
 
 
 def add_article_to_issue(issue: dict, article: dict) -> None:
     sections = issue['sections']
-    section = article['section']
+    if article['self_link'] in issue['appendix']:
+        section = 'Appendix'
+    else:
+        section = article['section']
     if section not in sections:
         sections[section] = {
             'articles': [],
             'id': 'section_' + str(len(sections)),
         }
     sections[section]['articles'].append(article)
+    issue['appendix'] = list(set(issue['appendix'] + article['external_articles']))
+
+
+def process_appendix(fetcher, key_creator, issue: dict) -> None:
+    appendix_articles = issue['appendix']
+    for article_url in appendix_articles:
+        process_article(fetcher, key_creator, issue, article_url)
 
 
 def add_section_links(issue: dict) -> None:
