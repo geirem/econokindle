@@ -18,8 +18,7 @@ from econokindle.RootParser import RootParser
 
 WORK = './cache/'
 RESOURCES = 'resources'
-file_loader = FileSystemLoader(RESOURCES)
-env = Environment(loader=file_loader)
+env = Environment(loader=FileSystemLoader(RESOURCES))
 
 
 #NOSONAR
@@ -28,13 +27,8 @@ def parse_args():
     parser.add_argument('-e', '--edition', help='The edition to render.  Default is current edition.')
     parser.add_argument('-a', '--max_age', help='Days before cached items are refreshed.  Default is five.')
     parser.add_argument('-k', '--kindle_gen', help='Path to "kindlegen" binary.  Default is ~/bin/kindlegen')
+    parser.add_argument('-f', '--cache_key', help='Force cache key.')
     return parser.parse_args()
-
-
-def max_cache_age(args: argparse.Namespace) -> int:
-    if not args.max_age:
-        return 5*86400
-    return int(args.max_age)
 
 
 def fetch_issue_url(fetcher: Fetcher, key_creator: KeyCreator, **kwargs: dict) -> str:
@@ -51,12 +45,7 @@ def fetch_issue_url(fetcher: Fetcher, key_creator: KeyCreator, **kwargs: dict) -
     return issue_url
 
 
-def main():
-    args = parse_args()
-    pool_manager = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
-    key_creator = KeyCreator(str(datetime.date.today()))
-    cache = Cache(WORK, max_cache_age(args), key_creator)
-    fetcher = Fetcher(pool_manager, cache)
+def process_issue(fetcher: Fetcher, key_creator: KeyCreator, args: argparse.Namespace) -> None:
     issue_url = fetch_issue_url(fetcher, key_creator, edition=args.edition)
     print(f'Processing {issue_url}...', end='')
     issue = IndexParser(fetcher.fetch_page(issue_url), key_creator).parse()
@@ -119,6 +108,30 @@ def render_template(template: str, file: str, issue: dict) -> None:
     content = env.get_template(template).render(sections=sections, title=issue['title'], issue=issue)
     with open(WORK + file, 'wt') as writer:
         writer.write(content)
+
+
+def max_cache_age(args: argparse.Namespace) -> int:
+    if not args.max_age:
+        return 5*86400
+    return int(args.max_age*86400)
+
+
+def configure_dependencies() -> list:
+    args = parse_args()
+    pool_manager = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
+    if args.cache_key:
+        cache_key = args.cache_key
+    else:
+        cache_key = str(datetime.date.today())
+    key_creator = KeyCreator(cache_key)
+    cache = Cache(WORK, max_cache_age(args), key_creator)
+    fetcher = Fetcher(pool_manager, cache)
+    return [args, fetcher, key_creator]
+
+
+def main():
+    args, fetcher, key_creator = configure_dependencies()
+    process_issue(fetcher, key_creator, args)
 
 
 main()
