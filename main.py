@@ -74,10 +74,9 @@ def process_article(fetcher: Fetcher, key_creator: KeyCreator, issue: dict, url:
 
 def add_article_to_issue(issue: dict, article: dict) -> None:
     sections = issue['sections']
-    if article['self_link'] in issue['appendix']:
-        section = 'Appendix'
-    else:
-        section = article['section']
+    if article['id'] not in issue['references']:
+        article['section'] = 'Appendix'
+    section = article['section']
     if section not in sections:
         sections[section] = {
             'articles': [],
