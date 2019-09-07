@@ -52,7 +52,7 @@ def process_issue(fetcher: Fetcher, key_creator: KeyCreator, args: argparse.Name
     print('done.')
     process_articles_in_issue(fetcher, key_creator, issue)
     add_section_links(issue)
-    process_appendix(fetcher, key_creator, issue)
+    # process_appendix(fetcher, key_creator, issue)
     render(issue)
     copyfile(RESOURCES + '/style.css', WORK + 'style.css')
     invoke_kindlegen(Platform.kindle_gen_binary(args), WORK)
@@ -66,16 +66,17 @@ def process_articles_in_issue(fetcher: Fetcher, key_creator: KeyCreator, issue: 
 
 def process_article(fetcher: Fetcher, key_creator: KeyCreator, issue: dict, url: str) -> None:
     print(f'Processing {url}...', end='')
-    article = ArticleParser(fetcher.fetch_page(url), key_creator, issue, url).parse()
+    article = ArticleParser(fetcher.fetch_page(url), key_creator, issue).parse()
     fetcher.fetch_images(article['images'])
     add_article_to_issue(issue, article)
+    add_articles_to_appendix(fetcher, key_creator, issue, article)
     print('done.')
 
 
 def add_article_to_issue(issue: dict, article: dict) -> None:
     sections = issue['sections']
-    if article['id'] not in issue['references']:
-        article['section'] = 'Appendix'
+    # if article['id'] not in issue['references']:
+    #     article['section'] = 'Appendix'
     section = article['section']
     if section not in sections:
         sections[section] = {
@@ -83,13 +84,26 @@ def add_article_to_issue(issue: dict, article: dict) -> None:
             'id': 'section_' + str(len(sections)),
         }
     sections[section]['articles'].append(article)
-    issue['appendix'] = list(set(issue['appendix'] + article['external_articles']))
+    # issue['appendix'] = list(set(issue['appendix'] + article['external_articles']))
 
 
-def process_appendix(fetcher, key_creator, issue: dict) -> None:
-    appendix_articles = issue['appendix']
-    for article_url in appendix_articles:
-        process_article(fetcher, key_creator, issue, article_url)
+# Node articles misbehave, as do some articles in this issue...  IDs look the same, but don't match?
+def add_articles_to_appendix(fetcher: Fetcher, key_creator: KeyCreator, issue: dict, article: dict) -> None:
+    for url in article['external_articles']:
+        id = key_creator.key(url)
+        if id in issue['references']:
+            continue
+        referenced_article = ArticleParser(fetcher.fetch_page(url), key_creator, issue).parse()
+        if referenced_article in issue['references']:
+            continue
+        issue['appendix'].append(referenced_article)
+
+
+#
+# def process_appendix(fetcher, key_creator, issue: dict) -> None:
+#     appendix_articles = issue['appendix']
+#     for article_url in appendix_articles:
+#         process_article(fetcher, key_creator, issue, article_url)
 
 
 def add_section_links(issue: dict) -> None:
