@@ -2,13 +2,14 @@ import json
 import re
 from typing import Optional
 
-from econokindle import KeyCreator
+from econokindle import Issue
 
 
 class DocumentParser:
 
-    def __init__(self, document: str, key_creator: KeyCreator):
-        self._key_creator = key_creator
+    def __init__(self, document: str, issue: Issue):
+        self._key_creator = issue.get_key_creator()
+        self._issue = issue
         self._script = self.extract_script(document)
 
     @staticmethod

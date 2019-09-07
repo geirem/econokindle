@@ -2,14 +2,14 @@ from typing import Optional
 
 from jsonpath_rw import parse
 
-from econokindle import KeyCreator
+from econokindle import KeyCreator, Issue
 from econokindle.DocumentParser import DocumentParser
 from econokindle.ParsingStrategy import ParsingStrategy
 
 
 class ArticleParser(DocumentParser):
 
-    def __init__(self, document: str, key_creator: KeyCreator, issue: dict):
+    def __init__(self, document: str, key_creator: KeyCreator, issue: Issue):
         super().__init__(document, key_creator)
         candidates = parse('[*].response.canonical').find(self._script)
         for candidate in candidates:
@@ -19,7 +19,7 @@ class ArticleParser(DocumentParser):
         self.__images = []
         self.__parsed_elements = []
         self.__url_path = parse('image.main.url.canonical')
-        self.__parsing_strategy = ParsingStrategy(key_creator, issue['references'], self.__images)
+        self.__parsing_strategy = ParsingStrategy(key_creator, issue.get_references(), self.__images)
 
     def __extract_main_image(self) -> Optional[str]:
         url = self.__url_path.find(self.__script)
