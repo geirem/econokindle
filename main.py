@@ -25,7 +25,6 @@ env = Environment(loader=FileSystemLoader(RESOURCES))
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-e', '--edition', help='The edition to render.  Default is current edition.')
-    parser.add_argument('-a', '--max_age', help='Days before cached items are refreshed.  Default is five.')
     parser.add_argument('-k', '--kindle_gen', help='Path to "kindlegen" binary.  Default is ~/bin/kindlegen')
     parser.add_argument('-f', '--cache_key', help='Force cache key.')
     return parser.parse_args()
@@ -110,12 +109,6 @@ def render_template(template: str, file: str, issue: dict) -> None:
         writer.write(content)
 
 
-def max_cache_age(args: argparse.Namespace) -> int:
-    if not args.max_age:
-        return 5*86400
-    return int(args.max_age*86400)
-
-
 def configure_dependencies() -> list:
     args = parse_args()
     pool_manager = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
@@ -124,7 +117,7 @@ def configure_dependencies() -> list:
     else:
         cache_key = str(datetime.date.today())
     key_creator = KeyCreator(cache_key)
-    cache = Cache(WORK, max_cache_age(args), key_creator)
+    cache = Cache(WORK, key_creator)
     fetcher = Fetcher(pool_manager, cache)
     return [args, fetcher, key_creator]
 

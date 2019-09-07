@@ -10,14 +10,12 @@ class Cache:
 
     BUFFER_SIZE = 1024 * 256
 
-    # TODO: age / now can be combined to the time stamp before which items are stale.
-    def __init__(self, path: str, max_age: int, key_creator: KeyCreator):
+    def __init__(self, path: str, key_creator: KeyCreator):
         if not os.path.exists(path):
             os.makedirs(path)
         if not path.endswith('/'):
             path += '/'
         self.__path = path
-        self.__max_age = max_age
         self.__now = time.time()
         self.__key_creator = key_creator
 
@@ -27,8 +25,6 @@ class Cache:
         if not os.path.isfile(key):
             return False
         file_info = os.stat(key)
-        if self.__now - file_info.st_mtime > self.__max_age:
-            return False
         if file_info.st_size == 0:
             return False
         return True
