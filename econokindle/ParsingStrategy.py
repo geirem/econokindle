@@ -1,34 +1,28 @@
-
-from econokindle.TagParser import TagParser
-from econokindle.parsers.SpanParser import SpanParser
-from econokindle.parsers.ImgParser import ImgParser
-from econokindle.parsers.BrParser import BrParser
-from econokindle.parsers.PParser import PParser
-from econokindle.parsers.IframeParser import IframeParser
-from econokindle.parsers.H2Parser import H2Parser
-from econokindle.parsers.FigureParser import FigureParser
-from econokindle.parsers.AParser import AParser
+import importlib
+import inspect
+import os
+import pkgutil
+from typing import Type
 
 from econokindle import KeyCreator
+from econokindle.TagParser import TagParser
 
 
 class ParsingStrategy:
 
     def __init__(self, key_creator: KeyCreator, valid_references: list, images: list):
-        self.__images = images
-        self.__key_creator = key_creator
-        self.__valid_references = valid_references
-        self.__parsers = {
-            'span': SpanParser(key_creator, self.__images, valid_references),
-            'img': ImgParser(key_creator, self.__images, valid_references),
-            'br': BrParser(key_creator, self.__images, valid_references),
-            'iframe': IframeParser(key_creator, self.__images, valid_references),
-            'a': AParser(key_creator, self.__images, valid_references),
-            'h2': H2Parser(key_creator, self.__images, valid_references),
-            'p': PParser(key_creator, self.__images, valid_references),
-            'figure': FigureParser(key_creator, self.__images, valid_references),
-        }
-        self.__default_parser = TagParser(key_creator, self.__images, valid_references)
+        self.__parsers = {}
+        for (_, name, _) in pkgutil.iter_modules([os.path.dirname(__file__) + '/parsers']):
+            imported_module = importlib.import_module('.' + name, package='econokindle.parsers')
+            clazz_name = list(filter(lambda x: x != 'TagParser' and not x.startswith('__'), dir(imported_module)))[0]
+            clazz = getattr(imported_module, clazz_name)
+            self.__parsers[self.__key_from_name(clazz_name)] = clazz(key_creator, images, valid_references)
+        self.__default_parser = TagParser(key_creator, images, valid_references)
+
+    @staticmethod
+    def __key_from_name(name: str) -> str:
+        tag = name.replace('Parser', '')
+        return tag.lower()
 
     def get_parser(self, tag: dict) -> TagParser:
         return self.__parsers.get(tag['name'], self.__default_parser)
