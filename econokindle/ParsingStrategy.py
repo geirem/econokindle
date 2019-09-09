@@ -19,8 +19,7 @@ class ParsingStrategy:
 
     @staticmethod
     def __key_from_name(name: str) -> str:
-        tag = name.replace('Parser', '')
-        return tag.lower()
+        return name.replace('Parser', '').lower()
 
     def get_parser(self, tag: dict) -> TagParser:
         return self.__parsers.get(tag['name'], self.__default_parser)
