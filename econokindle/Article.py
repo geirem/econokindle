@@ -27,7 +27,7 @@ class Article:
     def set_description(self, description: str) -> None:
         self.__structure['description'] = description
 
-    def setdateline(self, dateline: str) -> None:
+    def set_dateline(self, dateline: str) -> None:
         self.__structure['dateline'] = dateline
 
 #         result = {

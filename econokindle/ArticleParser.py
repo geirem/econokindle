@@ -2,7 +2,7 @@ from typing import Optional
 
 from jsonpath_rw import parse
 
-from econokindle import KeyCreator, Issue, Article
+from econokindle import Issue, Article
 from econokindle.DocumentParser import DocumentParser
 from econokindle.ParsingStrategy import ParsingStrategy
 
