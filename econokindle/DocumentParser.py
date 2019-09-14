@@ -1,6 +1,7 @@
 import json
-import re
 from typing import Optional
+
+from bs4 import BeautifulSoup
 
 from econokindle import KeyCreator
 
@@ -13,7 +14,7 @@ class DocumentParser:
 
     @staticmethod
     def extract_script(document: str) -> Optional[dict]:
-        script = re.findall('<script id="preloadedData" type="application/json">.+?</script>', document.replace('\n', ''))
-        script = script.pop().replace('<script id="preloadedData" type="application/json">', '')
-        script = script.replace('</script>', '')
-        return json.loads(script)
+        results = BeautifulSoup(document, 'html.parser').select('#preloadedData')
+        if len(results) == 0:
+            a = 1
+        return json.loads(results.pop().contents.pop())

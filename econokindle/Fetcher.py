@@ -11,29 +11,31 @@ class Fetcher:
     __timer = None
     __THROTTLE = 6
 
-    def __init__(self, pool_manager: PoolManager, key_creator: KeyCreator, cache: Cache):
+    def __init__(self, pool_manager: PoolManager, key_creator: KeyCreator, cache: Cache, path: str):
         self.__pool_manager = pool_manager
         self.__key_creator = key_creator
         self.__cache = cache
+        self.__path = path
         if Fetcher.__timer is None:
             Fetcher.__timer = time.time()
 
     # Throttle downloads.
     @staticmethod
     def __throttle() -> None:
-        print(f'Last timer was {Fetcher.__timer}.')
-        now = time.time()
-        print(f'Current timer is {now}.')
-        print(f'Elapsed time is {now - Fetcher.__timer}.')
-        print(f'Remaining time to wait is {Fetcher.__THROTTLE - now + Fetcher.__timer}')
         if Fetcher.__timer is None:
             Fetcher.__timer = time.time()
             return
-        time_to_sleep = Fetcher.__THROTTLE - (time.time() - Fetcher.__timer)
-        Fetcher.__timer = time.time()
-        if time_to_sleep < 0:
+        now = time.time()
+        elapsed = time.time() - Fetcher.__timer
+        remaining = Fetcher.__THROTTLE - elapsed
+        print(f'Last timer was {Fetcher.__timer}.')
+        print(f'Current timer is {now}.')
+        print(f'Elapsed time is {elapsed}.')
+        print(f'Remaining time to wait is {remaining}.')
+        if remaining < 0:
             return
-        time.sleep(time_to_sleep)
+        time.sleep(remaining)
+        Fetcher.__timer = time.time()
 
     def fetch_page(self, url: str) -> str:
         cached = self.__cache.get(url)
@@ -44,6 +46,8 @@ class Fetcher:
         if result.status != 200:
             raise Exception
         contents = result.data.decode("utf-8")
+        if 'preloadedData' not in contents:
+            raise FileNotFoundError
         self.__cache.store(url, contents)
         return contents
 
@@ -56,5 +60,5 @@ class Fetcher:
         if not image:
             image = self.__pool_manager.request('GET', url, preload_content=False).read()
             self.__cache.store(url, image)
-        with open(self.__key_creator.key((url)), 'wb') as out:
+        with open(self.__path + self.__key_creator.key(url), 'wb') as out:
             out.write(image)

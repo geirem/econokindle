@@ -1,5 +1,6 @@
 import argparse
 import datetime
+import os
 import re
 import sqlite3
 import subprocess
@@ -115,6 +116,8 @@ def render_template(template: str, file: str, issue: dict) -> None:
 
 
 def configure_dependencies() -> list:
+    if not os.path.exists(WORK):
+        os.makedirs(WORK)
     args = parse_args()
     pool_manager = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
     if args.cache_key:
@@ -122,9 +125,9 @@ def configure_dependencies() -> list:
     else:
         cache_key = str(datetime.date.today())
     key_creator = KeyCreator(cache_key)
-    conn = sqlite3.connect('cache.db')
+    conn = sqlite3.connect(WORK + 'cache.db')
     cache = SqliteCache(conn, key_creator)
-    fetcher = Fetcher(pool_manager, key_creator, cache)
+    fetcher = Fetcher(pool_manager, key_creator, cache, WORK)
     return [args, fetcher, key_creator]
 
 
