@@ -124,7 +124,7 @@ def configure_dependencies() -> list:
     key_creator = KeyCreator(cache_key)
     conn = sqlite3.connect('cache.db')
     cache = SqliteCache(conn, key_creator)
-    fetcher = Fetcher(pool_manager, cache)
+    fetcher = Fetcher(pool_manager, key_creator, cache)
     return [args, fetcher, key_creator]
 
 
