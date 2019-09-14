@@ -122,6 +122,23 @@ def configure_dependencies() -> list:
     key_creator = KeyCreator(cache_key)
     cache = Cache(WORK, key_creator)
     fetcher = Fetcher(pool_manager, cache)
+    conn = sqlite3.connect('example.db')
+    c = conn.cursor()
+
+    # Create table
+    c.execute('''CREATE TABLE Issue
+                 (date TEXT, trans TEXT, symbol text, qty real, price real)''')
+
+    # Insert a row of data
+    c.execute("INSERT INTO stocks VALUES ('2006-01-05','BUY','RHAT',100,35.14)")
+
+    # Save (commit) the changes
+    conn.commit()
+
+    # We can also close the connection if we are done with it.
+    # Just be sure any changes have been committed or they will be lost.
+    conn.close()
+
     return [args, fetcher, key_creator]
 
 
