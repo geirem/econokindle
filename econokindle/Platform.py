@@ -28,5 +28,5 @@ class Platform:
         else:
             root = '/Volumes/Kindle/documents/'
         target_name = root + issue['edition'] + '_economist.mobi'
-        if os.path.isfile(root):
+        if os.path.isdir(root):
             copyfile(cached_name, target_name)
