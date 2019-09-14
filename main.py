@@ -61,6 +61,8 @@ def process_issue(fetcher: Fetcher, key_creator: KeyCreator, args: argparse.Name
 def process_articles_in_issue(fetcher: Fetcher, key_creator: KeyCreator, issue: dict):
     for url in issue['urls']:
         print(f'Processing {url}...', end='')
+        if url.endswith(issue['edition']):
+            print('special content index, skipping.')
         article = ArticleParser(fetcher.fetch_page(url), key_creator, issue).parse()
         fetcher.fetch_images(article['images'])
         add_article_to_issue(issue, article)
