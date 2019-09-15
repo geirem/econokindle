@@ -24,14 +24,6 @@ class SqliteCache(Cache):
             retrieved DATETIME DEFAULT CURRENT_TIMESTAMP
         )''')
         c.close()
-    #
-    # def has(self, url: str) -> bool:
-    #     key = self._key_creator.key(url)
-    #     c = self.__connection.cursor()
-    #     c.execute('SELECT 1 FROM Images WHERE id = ?', [key])
-    #     results = c.fetchall()
-    #     c.close()
-    #     return len(results) == 1
 
     def get(self, url: str) -> Optional[str]:
         key = self._key_creator.key(url)

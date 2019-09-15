@@ -11,7 +11,6 @@ import urllib3
 from jinja2 import Environment, FileSystemLoader
 
 from econokindle.ArticleParser import ArticleParser
-from econokindle.Cache import Cache
 from econokindle.Fetcher import Fetcher
 from econokindle.IndexParser import IndexParser
 from econokindle.KeyCreator import KeyCreator
@@ -19,7 +18,7 @@ from econokindle.Platform import Platform
 from econokindle.RootParser import RootParser
 from econokindle.cache.SqliteCache import SqliteCache
 
-WORK = './cache/'
+WORK = './work/'
 RESOURCES = 'resources'
 env = Environment(loader=FileSystemLoader(RESOURCES))
 
@@ -63,14 +62,17 @@ def process_issue(fetcher: Fetcher, key_creator: KeyCreator, args: argparse.Name
     Platform.load_to_kindle(WORK, issue)
 
 
-def process_articles_in_issue(fetcher: Fetcher, key_creator: KeyCreator, issue: dict):
+def process_articles_in_issue(fetcher: Fetcher, key_creator: KeyCreator, issue: dict) -> None:
     for url in issue['urls']:
         print(f'Processing {url}...', end='')
         if url.endswith(issue['edition']):
             print('special content index, skipping.')
             continue
         article = ArticleParser(fetcher.fetch_page(url), key_creator, issue).parse()
-        fetcher.fetch_images(article['images'])
+        for image_url in article['images']:
+            image = fetcher.fetch_image(image_url)
+            with open(WORK + key_creator.key(image_url), 'wb') as out:
+                out.write(image)
         add_article_to_issue(issue, article)
         print('done.')
 
@@ -127,7 +129,7 @@ def configure_dependencies() -> list:
     else:
         cache_key = str(datetime.date.today())
     key_creator = KeyCreator(cache_key)
-    conn = sqlite3.connect(WORK + 'cache.db')
+    conn = sqlite3.connect('cache.db')
     cache = SqliteCache(conn, key_creator)
     fetcher = Fetcher(pool_manager, key_creator, cache)
     return [args, fetcher, key_creator]

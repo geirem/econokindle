@@ -4,7 +4,6 @@ from urllib3 import PoolManager
 
 from econokindle.Cache import Cache
 from econokindle.KeyCreator import KeyCreator
-from typing import List
 
 
 class Fetcher:
@@ -44,12 +43,6 @@ class Fetcher:
             raise FileNotFoundError
         self.__cache.store(url, contents)
         return contents
-
-    def fetch_images(self, image_urls: str) -> List[bytes]:
-        results = []
-        for image in image_urls:
-            results.append(self.fetch_image(image))
-        return results
 
     def fetch_image(self, url: str) -> bytes:
         image = self.__cache.get(url)
