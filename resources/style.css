@@ -1,8 +1,11 @@
-
-
 a.toc * {
     color: #000 !important;
     text-decoration: none !important;
+}
+
+a.next_pointer {
+    bottom: 0;
+    text-align: right;
 }
 
 body {
@@ -20,6 +23,14 @@ p {
     widows: 3;
 }
 
+p.dateline {
+    margin-top: 1.5em;
+}
+
+p.description {
+    margin-bottom: 1.0em;
+}
+
 h1 {
     margin: 0;
     padding: 0;
@@ -35,16 +46,16 @@ h2 {
     break-after: avoid-page;
 }
 
+h2.subheader {
+    margin-bottom: 0.5ex;
+}
+
 h3 {
     padding: 0;
     text-align: left;
     text-indent: 0;
     margin: 1.5em;
     break-after: avoid-page;
-}
-
-h2.subheader {
-    margin-bottom: 0.5ex;
 }
 
 @media amzn-kf8 {
@@ -55,22 +66,10 @@ h2.subheader {
         margin-top:-0.3225em;
         margin-bottom:-0.3245em;
     }
-    h1 {
-        margin: 0;
-        padding: 0;
-        text-align: left;
-        break-after: avoid-page;
-    }
 }
 @media amzn-mobi {
     span.dropcaps {
         font-size:3em;
         font-weight: bold;
-    }
-    h1 {
-        margin: 0;
-        padding: 0;
-        text-align: left;
-        break-after: avoid-page;
     }
 }
