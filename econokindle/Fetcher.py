@@ -4,6 +4,7 @@ from urllib3 import PoolManager
 
 from econokindle.Cache import Cache
 from econokindle.KeyCreator import KeyCreator
+from typing import List
 
 
 class Fetcher:
@@ -11,11 +12,10 @@ class Fetcher:
     __timer = None
     __THROTTLE = 6
 
-    def __init__(self, pool_manager: PoolManager, key_creator: KeyCreator, cache: Cache, path: str):
+    def __init__(self, pool_manager: PoolManager, key_creator: KeyCreator, cache: Cache):
         self.__pool_manager = pool_manager
         self.__key_creator = key_creator
         self.__cache = cache
-        self.__path = path
         if Fetcher.__timer is None:
             Fetcher.__timer = time.time()
 
@@ -25,13 +25,7 @@ class Fetcher:
         if Fetcher.__timer is None:
             Fetcher.__timer = time.time()
             return
-        now = time.time()
-        elapsed = time.time() - Fetcher.__timer
-        remaining = Fetcher.__THROTTLE - elapsed
-        print(f'Last timer was {Fetcher.__timer}.')
-        print(f'Current timer is {now}.')
-        print(f'Elapsed time is {elapsed}.')
-        print(f'Remaining time to wait is {remaining}.')
+        remaining = Fetcher.__THROTTLE - time.time() + Fetcher.__timer
         if remaining < 0:
             return
         time.sleep(remaining)
@@ -51,14 +45,15 @@ class Fetcher:
         self.__cache.store(url, contents)
         return contents
 
-    def fetch_images(self, image_urls: str) -> None:
+    def fetch_images(self, image_urls: str) -> List[bytes]:
+        results = []
         for image in image_urls:
-            self.fetch_image(image)
+            results.append(self.fetch_image(image))
+        return results
 
-    def fetch_image(self, url: str) -> None:
+    def fetch_image(self, url: str) -> bytes:
         image = self.__cache.get(url)
         if not image:
             image = self.__pool_manager.request('GET', url, preload_content=False).read()
             self.__cache.store(url, image)
-        with open(self.__path + self.__key_creator.key(url), 'wb') as out:
-            out.write(image)
+        return image

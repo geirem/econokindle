@@ -51,7 +51,9 @@ def process_issue(fetcher: Fetcher, key_creator: KeyCreator, args: argparse.Name
     issue_url = fetch_issue_url(fetcher, key_creator, edition=args.edition)
     print(f'Processing {issue_url}...', end='')
     issue = IndexParser(fetcher.fetch_page(issue_url), key_creator).parse()
-    fetcher.fetch_image(issue['cover_image_url'])
+    cover_image = fetcher.fetch_image(issue['cover_image_url'])
+    with open(WORK + key_creator.key(issue['cover_image_url']), 'wb') as out:
+        out.write(cover_image)
     print('done.')
     process_articles_in_issue(fetcher, key_creator, issue)
     add_section_links(issue)
@@ -127,7 +129,7 @@ def configure_dependencies() -> list:
     key_creator = KeyCreator(cache_key)
     conn = sqlite3.connect(WORK + 'cache.db')
     cache = SqliteCache(conn, key_creator)
-    fetcher = Fetcher(pool_manager, key_creator, cache, WORK)
+    fetcher = Fetcher(pool_manager, key_creator, cache)
     return [args, fetcher, key_creator]
 
 
