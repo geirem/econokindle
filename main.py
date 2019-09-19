@@ -119,7 +119,8 @@ def render_template(template: str, file: str, issue: dict) -> None:
 
 
 def configure_dependencies() -> list:
-    shutil.rmtree(WORK)
+    if os.path.isdir(WORK):
+        shutil.rmtree(WORK)
     os.makedirs(WORK)
     args = parse_args()
     pool_manager = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
