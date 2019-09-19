@@ -13,7 +13,7 @@ class ArticleParser(DocumentParser):
         super().__init__(document, key_creator)
         candidates = parse('[*].response.canonical').find(self._script)
         for candidate in candidates:
-            if 'url' in candidate.value:
+            if candidate.value and 'url' in candidate.value:
                 self.__script = candidate.value
                 break
         self.__images = []
