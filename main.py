@@ -5,6 +5,7 @@ import re
 import shutil
 import sqlite3
 import subprocess
+import time
 from shutil import copyfile
 
 import certifi
@@ -27,20 +28,13 @@ env = Environment(loader=FileSystemLoader(RESOURCES))
 #NOSONAR
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-e', '--edition', help='The edition to render.  Default is current edition.')
     parser.add_argument('-k', '--kindle_gen', help='Path to "kindlegen" binary.  Default is ~/bin/kindlegen')
     parser.add_argument('-f', '--cache_key', help='Force cache key.')
     return parser.parse_args()
 
 
-def fetch_issue_url(fetcher: Fetcher, key_creator: KeyCreator, **kwargs: dict) -> str:
+def fetch_issue_url(fetcher: Fetcher, key_creator: KeyCreator) -> str:
     front_url = 'https://www.economist.com/'
-    if 'edition' in kwargs and kwargs['edition']:
-        edition = str(kwargs['edition'])
-        if re.search('^\\d{4}-\\d{2}-\\d{2}$', edition):
-            return front_url + 'printedition/' + edition
-        else:
-            raise SyntaxError('Invalid edition date format.')
     print(f'Processing {front_url}...', end='')
     issue_url = RootParser(fetcher.fetch_page(front_url), key_creator).parse()['issue_url']
     print('done.')
@@ -48,7 +42,7 @@ def fetch_issue_url(fetcher: Fetcher, key_creator: KeyCreator, **kwargs: dict) -
 
 
 def process_issue(fetcher: Fetcher, key_creator: KeyCreator, args: argparse.Namespace) -> None:
-    issue_url = fetch_issue_url(fetcher, key_creator, edition=args.edition)
+    issue_url = fetch_issue_url(fetcher, key_creator)
     print(f'Processing {issue_url}...', end='')
     issue = IndexParser(fetcher.fetch_page(issue_url), key_creator).parse()
     cover_image = fetcher.fetch_image(issue['cover_image_url'])
@@ -69,7 +63,11 @@ def process_articles_in_issue(fetcher: Fetcher, key_creator: KeyCreator, issue: 
         if url.endswith(issue['edition']):
             print('special content index, skipping.')
             continue
-        article = ArticleParser(fetcher.fetch_page(url), key_creator, issue).parse()
+        try:
+            article = ArticleParser(fetcher.fetch_page(url), key_creator, issue).parse()
+        except FileNotFoundError:
+            time.sleep(5)
+            article = ArticleParser(fetcher.fetch_page(url), key_creator, issue).parse()
         for image_url in article['images']:
             image = fetcher.fetch_image(image_url)
             with open(WORK + key_creator.key(image_url), 'wb') as out:
