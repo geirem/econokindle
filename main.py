@@ -29,7 +29,6 @@ env = Environment(loader=FileSystemLoader(RESOURCES))
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-k', '--kindle_gen', help='Path to "kindlegen" binary.  Default is ~/bin/kindlegen')
-    parser.add_argument('-f', '--cache_key', help='Force cache key.')
     return parser.parse_args()
 
 
@@ -124,11 +123,7 @@ def configure_dependencies() -> list:
     os.makedirs(WORK)
     args = parse_args()
     pool_manager = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
-    if args.cache_key:
-        cache_key = args.cache_key
-    else:
-        cache_key = str(datetime.date.today())
-    key_creator = KeyCreator(cache_key)
+    key_creator = KeyCreator(str(datetime.date.today()))
     conn = sqlite3.connect('cache.db')
     cache = SqliteCache(conn, key_creator)
     fetcher = Fetcher(pool_manager, key_creator, cache)
