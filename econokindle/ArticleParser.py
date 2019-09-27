@@ -45,6 +45,8 @@ class ArticleParser(DocumentParser):
         if image:
             self.__images.append(image)
             image = self._key_creator.key(image)
+        if '■' not in self.__parsed_elements:
+            self.__parsed_elements.append('<p>■</p>')
         result = {
             'title': self.__apply_html_entities(self.__script['headline']),
             'text': self.__apply_html_entities(''.join(self.__parsed_elements)),

@@ -30,7 +30,7 @@
         {% if article['image'] -%}
             <p class="description"><img src="{{ article['image'] }}" alt=""/></p>
         {% endif -%}
-        {{ article['text'] }}
+        <div class="article">{{ article['text'] }}</div>
         <mbp:pagebreak/>
     {% endfor -%}
 {% endfor -%}

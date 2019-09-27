@@ -15,12 +15,13 @@ body {
     font-size: 16px;
 }
 
-p {
+p.article {
     margin: 0;
     padding: 0;
     text-indent: 10px;
-    orphans: 2;
-    widows: 3;
+    orphans: 2!important;
+    widows: 3!important;
+    display: inline-block;
 }
 
 p.dateline {
