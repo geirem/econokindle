@@ -99,8 +99,8 @@ def add_section_links(issue: dict) -> None:
 
 
 #NOSONAR
-def invoke_kindlegen(kindle_gen: str, path: str) -> None:
-    subprocess.call([kindle_gen, 'economist.opf'], cwd=path)
+def invoke_kindlegen(kindle_gen: str, path: str, issue) -> None:
+    subprocess.call([kindle_gen, issue['edition'] + '_' + 'economist.opf'], cwd=path)
 
 
 def render(issue: dict) -> None:
@@ -113,7 +113,7 @@ def render(issue: dict) -> None:
 def render_template(template: str, file: str, issue: dict) -> None:
     sections = issue['sections']
     content = env.get_template(template).render(sections=sections, title=issue['title'], issue=issue)
-    with open(WORK + file, 'wt') as writer:
+    with open(WORK + issue['edition'] + '_' + file, 'wt') as writer:
         writer.write(content)
 
 
