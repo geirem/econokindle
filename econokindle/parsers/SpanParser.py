@@ -10,4 +10,4 @@ class SpanParser(TagParser):
                 'open': '<span class="dropcaps">',
                 'close': '</span>',
             }
-        return {'open': '', 'close': ''}
+        return super().parse(tag)
