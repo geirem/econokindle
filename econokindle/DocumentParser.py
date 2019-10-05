@@ -15,6 +15,4 @@ class DocumentParser:
     @staticmethod
     def extract_script(document: str) -> Optional[dict]:
         results = BeautifulSoup(document, 'html.parser').select('#preloadedData')
-        if len(results) == 0:
-            a = 1
         return json.loads(results.pop().contents.pop())
