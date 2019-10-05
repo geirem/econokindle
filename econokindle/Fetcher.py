@@ -9,7 +9,7 @@ from econokindle.KeyCreator import KeyCreator
 class Fetcher:
 
     __timer = None
-    __THROTTLE = 3
+    __THROTTLE_TIME_S = 3
 
     def __init__(self, pool_manager: PoolManager, key_creator: KeyCreator, cache: Cache):
         self.__pool_manager = pool_manager
@@ -24,7 +24,7 @@ class Fetcher:
         if Fetcher.__timer is None:
             Fetcher.__timer = time.time()
             return
-        remaining = Fetcher.__THROTTLE - time.time() + Fetcher.__timer
+        remaining = Fetcher.__THROTTLE_TIME_S - time.time() + Fetcher.__timer
         if remaining < 0:
             return
         time.sleep(remaining)
