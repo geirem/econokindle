@@ -58,6 +58,8 @@ def process_issue(fetcher: Fetcher, key_creator: KeyCreator, args: argparse.Name
 
 def process_articles_in_issue(fetcher: Fetcher, key_creator: KeyCreator, issue: dict) -> None:
     for url in issue['urls']:
+        if url == 'https://www.economist.com/story-collections/global':
+            continue
         print(f'Processing {url}...', end='')
         if url.endswith(issue['edition']):
             print('special content index, skipping.')
