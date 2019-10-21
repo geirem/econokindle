@@ -8,6 +8,7 @@ from econokindle.KeyCreator import KeyCreator
 
 class Fetcher:
 
+    __MAX_RETRIES = 5
     __timer = None
     __THROTTLE_TIME_S = 5
 
@@ -37,7 +38,7 @@ class Fetcher:
         return self.__fetch_uncached(url)
 
     def __fetch_uncached(self, url: str) -> str:
-        for _ in range(5):
+        for _ in range(Fetcher.__MAX_RETRIES):
             self.__throttle()
             result = self.__pool_manager.request("GET", url)
             if result.status != 200:
