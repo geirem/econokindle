@@ -9,7 +9,7 @@ from econokindle.KeyCreator import KeyCreator
 class Fetcher:
 
     __timer = None
-    __THROTTLE_TIME_S = 3
+    __THROTTLE_TIME_S = 5
 
     def __init__(self, pool_manager: PoolManager, key_creator: KeyCreator, cache: Cache):
         self.__pool_manager = pool_manager
@@ -34,15 +34,20 @@ class Fetcher:
         cached = self.__cache.get(url)
         if cached is not None:
             return cached
-        self.__throttle()
-        result = self.__pool_manager.request("GET", url)
-        if result.status != 200:
-            raise Exception
-        contents = result.data.decode("utf-8")
-        if 'preloadedData' not in contents:
-            raise FileNotFoundError
-        self.__cache.store(url, contents)
-        return contents
+        return self.__fetch_uncached(url)
+
+    def __fetch_uncached(self, url: str) -> str:
+        for _ in range(5):
+            self.__throttle()
+            result = self.__pool_manager.request("GET", url)
+            if result.status != 200:
+                raise Exception
+            contents = result.data.decode("utf-8")
+            if 'preloadedData' not in contents:
+                continue
+            self.__cache.store(url, contents)
+            return contents
+        raise FileNotFoundError
 
     def fetch_image(self, url: str) -> bytes:
         image = self.__cache.get(url)
