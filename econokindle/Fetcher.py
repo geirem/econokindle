@@ -8,28 +8,10 @@ from econokindle.KeyCreator import KeyCreator
 
 class Fetcher:
 
-    __MAX_RETRIES = 5
-    __timer = None
-    __THROTTLE_TIME_S = 5
-
     def __init__(self, pool_manager: PoolManager, key_creator: KeyCreator, cache: Cache):
         self.__pool_manager = pool_manager
         self.__key_creator = key_creator
         self.__cache = cache
-        if Fetcher.__timer is None:
-            Fetcher.__timer = time.time()
-
-    # Throttle downloads.
-    @staticmethod
-    def __throttle() -> None:
-        if Fetcher.__timer is None:
-            Fetcher.__timer = time.time()
-            return
-        remaining = Fetcher.__THROTTLE_TIME_S - time.time() + Fetcher.__timer
-        if remaining < 0:
-            return
-        time.sleep(remaining)
-        Fetcher.__timer = time.time()
 
     def fetch_page(self, url: str) -> str:
         cached = self.__cache.get(url)
@@ -38,17 +20,16 @@ class Fetcher:
         return self.__fetch_uncached(url)
 
     def __fetch_uncached(self, url: str) -> str:
-        for _ in range(Fetcher.__MAX_RETRIES):
-            self.__throttle()
+        while True:
             result = self.__pool_manager.request("GET", url)
             if result.status != 200:
                 raise Exception
             contents = result.data.decode("utf-8")
-            if 'preloadedData' not in contents:
-                continue
-            self.__cache.store(url, contents)
-            return contents
-        raise FileNotFoundError
+            if 'preloadedData' in contents:
+                self.__cache.store(url, contents)
+                return contents
+            time.sleep(10)
+            continue
 
     def fetch_image(self, url: str) -> bytes:
         image = self.__cache.get(url)
