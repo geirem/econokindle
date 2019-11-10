@@ -29,7 +29,6 @@ class Fetcher:
                 self.__cache.store(url, contents)
                 return contents
             time.sleep(10)
-            continue
 
     def fetch_image(self, url: str) -> bytes:
         image = self.__cache.get(url)
