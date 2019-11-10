@@ -1,3 +1,4 @@
+import re
 import time
 from urllib3 import PoolManager, HTTPResponse
 
@@ -22,11 +23,19 @@ class Fetcher:
         return self.__fetch_uncached(url)
 
     def __update_cookies(self, response: HTTPResponse) -> None:
-        new_cookies = response.headers.get('set-cookie').split(',')
+        cookie_string = response.headers.get('set-cookie')
+        parts = cookie_string.split(', ')
+        new_cookies = []
+        for p in parts:
+            if re.search('^[^ ]+=', p):
+                new_cookies.append(p)
+            else:
+                new_cookies[-1] += p
         for new_cookie in new_cookies:
-            self.__cookie_jar.add(Cookie(new_cookie))
+            self.__cookie_jar.add(Cookie(new_cookie.strip()))
 
     def __fetch_uncached(self, url: str) -> str:
+        cookies = self.__cookie_jar.get_for_url(url)
         while True:
             response = self.__pool_manager.request("GET", url)
             status = response.status

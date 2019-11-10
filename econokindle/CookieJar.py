@@ -1,6 +1,6 @@
 from typing import List
 
-from econokindle import Cookie
+from econokindle.Cookie import Cookie
 
 
 class CookieJar:
@@ -12,4 +12,4 @@ class CookieJar:
         self.__cookies.append(cookie)
 
     def get_for_url(self, url: str) -> List[Cookie]:
-        return []
+        return [c for c in self.__cookies if c.applies_to(url)]
