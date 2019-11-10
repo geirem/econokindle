@@ -12,4 +12,4 @@ class CookieJar:
         self.__cookies.append(cookie)
 
     def get_for_url(self, url: str) -> List[Cookie]:
-        return [c for c in self.__cookies if c.applies_to(url)]
+        return [c.get_for_header() for c in self.__cookies if c.applies_to(url)]

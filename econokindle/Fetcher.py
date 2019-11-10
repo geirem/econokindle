@@ -30,14 +30,14 @@ class Fetcher:
             if re.search('^[^ ]+=', p):
                 new_cookies.append(p)
             else:
-                new_cookies[-1] += p
+                new_cookies[-1] += ', ' + p
         for new_cookie in new_cookies:
             self.__cookie_jar.add(Cookie(new_cookie.strip()))
 
     def __fetch_uncached(self, url: str) -> str:
-        cookies = self.__cookie_jar.get_for_url(url)
+        cookies = '; '.join(self.__cookie_jar.get_for_url(url))
         while True:
-            response = self.__pool_manager.request("GET", url)
+            response = self.__pool_manager.request("GET", url, headers={'Cookie': cookies})
             status = response.status
             if status == 200:
                 self.__update_cookies(response)
@@ -45,6 +45,7 @@ class Fetcher:
                 if 'preloadedData' in contents:
                     self.__cache.store(url, contents)
                     return contents
+            print('.', end='')
             time.sleep(10)
 
     def fetch_image(self, url: str) -> bytes:

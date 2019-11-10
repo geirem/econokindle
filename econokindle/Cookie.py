@@ -14,11 +14,16 @@ class Cookie:
             key, value = part.strip().split('=', 1)
             self.__properties[key.lower()] = value
 
+    def get_for_header(self):
+        return self.__name + '=' + self.__value
+
     def applies_to(self, url: str) -> bool:
         parsed = urlparse(url)
         if 'secure' in self.__properties and parsed.scheme != 'https':
             return False
-        if 'path' in self.__properties and not parsed.path.starts_with(self.__properties['path']):
+        if 'path' in self.__properties and not parsed.path.startswith(self.__properties['path']):
+            return False
+        if 'domain' in self.__properties and not parsed.hostname.endswith(self.__properties['domain']):
             return False
         return True
 
