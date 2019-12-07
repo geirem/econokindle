@@ -16,3 +16,9 @@ class DocumentParser:
     def extract_script(document: str) -> Optional[dict]:
         results = BeautifulSoup(document, 'html.parser').select('#preloadedData')
         return json.loads(results.pop().contents.pop())
+
+    @staticmethod
+    def _apply_html_entities(processed: Optional[str]) -> str:
+        if processed is None:
+            return ''
+        return processed.encode(encoding='ascii', errors='xmlcharrefreplace').decode('utf-8')

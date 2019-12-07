@@ -50,12 +50,12 @@ class ArticleParser(DocumentParser):
             self.__parsed_elements.append('<span>■</span>')
             self.__parsed_elements.append(last_element)
         result = {
-            'title': self.__apply_html_entities(self.__script['headline']),
-            'text': self.__apply_html_entities(''.join(self.__parsed_elements)),
-            'section': self.__apply_html_entities(self.__script['print']['section']['headline']),
-            'subheadline': self.__apply_html_entities(self.__script['subheadline']),
-            'description': self.__apply_html_entities(self.__script['description']),
-            'dateline': self.__apply_html_entities(self.__script['dateline']),
+            'title': self._apply_html_entities(self.__script['headline']),
+            'text': self._apply_html_entities(''.join(self.__parsed_elements)),
+            'section': self._apply_html_entities(self.__script['print']['section']['headline']),
+            'subheadline': self._apply_html_entities(self.__script['subheadline']),
+            'description': self._apply_html_entities(self.__script['description']),
+            'dateline': self._apply_html_entities(self.__script['dateline']),
             'image': image,
             'images': self.__images,
             'id': article_id,
@@ -71,9 +71,3 @@ class ArticleParser(DocumentParser):
                 self.__parsed_elements.append(tag['open'])
                 self.__parse_article_body(item['children'])
                 self.__parsed_elements.append(tag['close'])
-
-    @staticmethod
-    def __apply_html_entities(processed: Optional[str]) -> str:
-        if processed is None:
-            return ''
-        return processed.encode(encoding='ascii', errors='xmlcharrefreplace').decode('utf-8')

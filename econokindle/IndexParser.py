@@ -30,12 +30,12 @@ class IndexParser(DocumentParser):
             references.append(self._key_creator.key(url))
         return {
             'cover_image_url': cover_url,
-            'cover_title': cover_title,
+            'cover_title': self._apply_html_entities(cover_title),
             'sections': sections,
             'urls': urls,
             'references': references,
             'cover_image_name': self._key_creator.key(cover_url),
             'edition': edition,
-            'title': 'The Economist - ' + cover_title,
+            'title': self._apply_html_entities('The Economist - ' + cover_title),
         }
 
