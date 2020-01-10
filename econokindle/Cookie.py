@@ -14,7 +14,7 @@ class Cookie:
             key, value = part.strip().split('=', 1)
             self.__properties[key.lower()] = value
 
-    def get_for_header(self):
+    def get_for_header(self) -> str:
         return self.__name + '=' + self.__value
 
     def applies_to(self, url: str) -> bool:

@@ -1,11 +1,9 @@
 import argparse
 import datetime
 import os
-import re
 import shutil
 import sqlite3
 import subprocess
-import time
 from shutil import copyfile
 
 import certifi

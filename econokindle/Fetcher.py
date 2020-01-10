@@ -42,7 +42,10 @@ class Fetcher:
             if status == 200:
                 self.__update_cookies(response)
                 contents = response.data.decode("utf-8")
-                if 'preloadedData' in contents:
+                if '__NEXT_DATA__' in contents:
+                    self.__cache.store(url, contents)
+                    return contents
+                if '#preloadedData' in contents:
                     self.__cache.store(url, contents)
                     return contents
             print('.', end='')

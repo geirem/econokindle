@@ -14,8 +14,12 @@ class DocumentParser:
 
     @staticmethod
     def extract_script(document: str) -> Optional[dict]:
-        results = BeautifulSoup(document, 'html.parser').select('#preloadedData')
-        return json.loads(results.pop().contents.pop())
+        bs = BeautifulSoup(document, 'html.parser')
+        results = bs.find('script', {'id': '__NEXT_DATA__'})
+        if len(results) > 0:
+            return json.loads(results.contents.pop())
+        results = bs.select('#preloadedData')
+        return json.loads(results.contents.pop())
 
     @staticmethod
     def _apply_html_entities(processed: Optional[str]) -> str:

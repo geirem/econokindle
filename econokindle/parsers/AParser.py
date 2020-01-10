@@ -13,6 +13,9 @@ class AParser(TagParser):
         else:
             href = attributes['href']
             next_child = self._peek_at_first_child(item)
+            if 'data' not in next_child:
+                tag['open'] = '<a>'
+                return tag
             if next_child['data'] == 'article':
                 tag['open'] = f'<a href="{href}">online '
             else:
