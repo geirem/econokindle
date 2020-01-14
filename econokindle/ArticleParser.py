@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Any
 
 from jsonpath_rw import parse
 
@@ -33,10 +33,8 @@ class ArticleParser(DocumentParser):
                 return self._script[item]
 
     def __start_body_parsing(self) -> None:
-        for item in self._script:
-            if item.startswith('_text'):
-                self.__parse_article_body(self._script[item])
-                return
+        for item in self._script['text']:
+            self.__parse_article_body(item)
 
     def parse(self) -> dict:
         article_id = self._key_creator.key(self._script['url']['canonical'])
@@ -62,12 +60,17 @@ class ArticleParser(DocumentParser):
         }
         return result
 
-    def __parse_article_body(self, element: dict) -> None:
+    def __parse_article_body(self, element: Any) -> None:
+        if type(element) == dict:
+            element = [element]
         for item in element:
-            if item['type'] == 'text':
-                self.__parsed_elements.append(item['data'])
-            elif item['type'] == 'tag':
-                tag = self.__parsing_strategy.get_parser(item).parse(item)
-                self.__parsed_elements.append(tag['open'])
-                self.__parse_article_body(item['children'])
-                self.__parsed_elements.append(tag['close'])
+            self.__sub_parse(item)
+
+    def __sub_parse(self, element: Any) -> None:
+        if element['type'] == 'text':
+            self.__parsed_elements.append(element['data'])
+        elif element['type'] == 'tag':
+            tag = self.__parsing_strategy.get_parser(element).parse(element)
+            self.__parsed_elements.append(tag['open'])
+            self.__parse_article_body(element['children'])
+            self.__parsed_elements.append(tag['close'])
