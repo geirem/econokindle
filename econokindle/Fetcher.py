@@ -37,15 +37,17 @@ class Fetcher:
     def __fetch_uncached(self, url: str) -> str:
         cookies = '; '.join(self.__cookie_jar.get_for_url(url))
         while True:
-            response = self.__pool_manager.request("GET", url, headers={'Cookie': cookies})
+            response = self.__pool_manager.request(
+                "GET", url, headers={
+                    'Cookie': cookies,
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; rv:68.0) Gecko/20100101 Firefox/68.0'
+                }
+            )
             status = response.status
             if status == 200:
                 self.__update_cookies(response)
                 contents = response.data.decode("utf-8")
-                if '__NEXT_DATA__' in contents:
-                    self.__cache.store(url, contents)
-                    return contents
-                if '#preloadedData' in contents:
+                if 'preloadedData' in contents or '__NEXT_DATA__' in contents:
                     self.__cache.store(url, contents)
                     return contents
             print('.', end='')

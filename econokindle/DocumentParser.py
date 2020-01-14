@@ -16,10 +16,12 @@ class DocumentParser:
     def extract_script(document: str) -> Optional[dict]:
         bs = BeautifulSoup(document, 'html.parser')
         results = bs.find('script', {'id': '__NEXT_DATA__'})
-        if len(results) > 0:
+        if results is not None and len(results) > 0:
             return json.loads(results.contents.pop())
-        results = bs.select('#preloadedData')
-        return json.loads(results.contents.pop())
+        results = bs.find('script', {'id': 'preloadedData'})
+        if results is not None and len(results) > 0:
+            return json.loads(results.contents.pop())
+        raise FileNotFoundError
 
     @staticmethod
     def _apply_html_entities(processed: Optional[str]) -> str:

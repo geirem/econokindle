@@ -15,7 +15,6 @@ from econokindle.Fetcher import Fetcher
 from econokindle.IndexParser import IndexParser
 from econokindle.KeyCreator import KeyCreator
 from econokindle.Platform import Platform
-from econokindle.RootParser import RootParser
 from econokindle.cache.SqliteCache import SqliteCache
 
 WORK = './work/'
@@ -30,16 +29,8 @@ def parse_args():
     return parser.parse_args()
 
 
-def fetch_issue_url(fetcher: Fetcher, key_creator: KeyCreator) -> str:
-    front_url = 'https://www.economist.com/'
-    print(f'Processing {front_url}...', end='')
-    issue_url = RootParser(fetcher.fetch_page(front_url), key_creator).parse()['issue_url']
-    print('done.')
-    return issue_url
-
-
 def process_issue(fetcher: Fetcher, key_creator: KeyCreator, args: argparse.Namespace) -> None:
-    issue_url = fetch_issue_url(fetcher, key_creator)
+    issue_url = 'https://www.economist.com/printedition'
     print(f'Processing {issue_url}...', end='')
     issue = IndexParser(fetcher.fetch_page(issue_url), key_creator).parse()
     cover_image = fetcher.fetch_image(issue['cover_image_url'])
@@ -60,10 +51,7 @@ def process_articles_in_issue(fetcher: Fetcher, key_creator: KeyCreator, issue: 
         if url.endswith(issue['edition']):
             print('special content index, skipping.')
             continue
-        try:
-            article = ArticleParser(fetcher.fetch_page(url), key_creator, issue).parse()
-        except FileNotFoundError:
-            article = ArticleParser(fetcher.fetch_page(url), key_creator, issue).parse()
+        article = ArticleParser(fetcher.fetch_page(url), key_creator, issue).parse()
         for image_url in article['images']:
             image = fetcher.fetch_image(image_url)
             with open(WORK + key_creator.key(image_url), 'wb') as out:
