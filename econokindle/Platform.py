@@ -22,7 +22,7 @@ class Platform:
 
     @staticmethod
     def load_to_kindle(work: str, issue: dict) -> None:
-        cached_name = work + '2020_01_09_economist.mobi'
+        cached_name = work + 'economist.mobi'
         if platform.system() == 'Windows':
             root = 'D:/documents/'
         else:

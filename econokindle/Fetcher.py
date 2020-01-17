@@ -1,6 +1,7 @@
 import re
 import time
 from urllib3 import PoolManager, HTTPResponse
+from urllib3.exceptions import MaxRetryError
 
 from econokindle.Cookie import Cookie
 from econokindle.CookieJar import CookieJar
@@ -37,21 +38,25 @@ class Fetcher:
     def __fetch_uncached(self, url: str) -> str:
         cookies = '; '.join(self.__cookie_jar.get_for_url(url))
         while True:
-            response = self.__pool_manager.request(
-                "GET", url, headers={
-                    'Cookie': cookies,
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; rv:68.0) Gecko/20100101 Firefox/68.0'
-                }
-            )
-            status = response.status
-            if status == 200:
-                self.__update_cookies(response)
-                contents = response.data.decode("utf-8")
-                if 'preloadedData' in contents or '__NEXT_DATA__' in contents:
-                    self.__cache.store(url, contents)
-                    return contents
-            print('.', end='')
-            time.sleep(10)
+            try:
+                response = self.__pool_manager.request(
+                    "GET", url, headers={
+                        'Cookie': cookies,
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; rv:68.0) Gecko/20100101 Firefox/68.0'
+                    }
+                )
+                status = response.status
+                if status == 200:
+                    self.__update_cookies(response)
+                    contents = response.data.decode("utf-8")
+                    if 'preloadedData' in contents or '__NEXT_DATA__' in contents:
+                        self.__cache.store(url, contents)
+                        return contents
+            except MaxRetryError:
+                pass
+            else:
+                print('.', end='')
+                time.sleep(10)
 
     def fetch_image(self, url: str) -> bytes:
         image = self.__cache.get(url)
