@@ -19,7 +19,7 @@ from econokindle.cache.SqliteCache import SqliteCache
 
 WORK = './work/'
 RESOURCES = 'resources'
-env = Environment(loader=FileSystemLoader(RESOURCES))
+env = Environment(loader=FileSystemLoader(RESOURCES), autoescape=True)
 
 
 #NOSONAR
