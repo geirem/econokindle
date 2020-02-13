@@ -19,7 +19,7 @@ from econokindle.cache.SqliteCache import SqliteCache
 
 WORK = './work/'
 RESOURCES = 'resources'
-env = Environment(loader=FileSystemLoader(RESOURCES), autoescape=True)
+env = Environment(loader=FileSystemLoader(RESOURCES), autoescape=False)
 
 
 #NOSONAR
@@ -41,7 +41,7 @@ def process_issue(fetcher: Fetcher, key_creator: KeyCreator, args: argparse.Name
     add_section_links(issue)
     render(issue)
     copyfile(RESOURCES + '/style.css', WORK + 'style.css')
-    invoke_kindlegen(Platform.kindle_gen_binary(args), WORK)
+    convert_to_mobi(Platform.kindle_gen_binary(args), WORK)
     Platform.load_to_kindle(WORK, issue)
 
 
@@ -84,7 +84,7 @@ def add_section_links(issue: dict) -> None:
 
 
 #NOSONAR
-def invoke_kindlegen(kindle_gen: str, path: str) -> None:
+def convert_to_mobi(kindle_gen: str, path: str) -> None:
     subprocess.call([kindle_gen, 'economist.opf'], cwd=path)
 
 

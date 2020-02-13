@@ -27,4 +27,4 @@ class DocumentParser:
     def _apply_html_entities(processed: Optional[str]) -> str:
         if processed is None:
             return ''
-        return processed.encode(encoding='ascii', errors='xmlcharrefreplace').decode('utf-8')
+        return processed.encode(encoding='ascii', errors='xmlcharrefreplace').decode('ascii', 'strict')

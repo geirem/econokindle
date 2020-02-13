@@ -6,9 +6,6 @@ from shutil import copyfile
 
 class Platform:
 
-    def __init__(self):
-        pass
-
     @staticmethod
     def kindle_gen_binary(args: argparse.Namespace) -> str:
         if args.kindle_gen:
@@ -23,10 +20,12 @@ class Platform:
     @staticmethod
     def load_to_kindle(work: str, issue: dict) -> None:
         cached_name = work + 'economist.mobi'
+        cached_edition_name = work + issue['edition'] + '_economist.mobi'
         if platform.system() == 'Windows':
             root = 'D:/documents/'
         else:
             root = '/Volumes/Kindle/documents/'
         target_name = root + issue['edition'] + '_economist.mobi'
+        os.rename(cached_name, cached_edition_name)
         if os.path.isdir(root):
-            copyfile(cached_name, target_name)
+            copyfile(cached_edition_name, target_name)
