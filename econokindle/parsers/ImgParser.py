@@ -8,9 +8,9 @@ class ImgParser(TagParser):
         src = attributes['src']
         name = self._key_creator.key(src)
         self._images.append(src)
-        height = attributes['height']
-        width = attributes['width']
+        height = f'height="{attributes["height"]}"' if 'height' in attributes else ''
+        width = f'width="{attributes["width"]}"' if 'width' in attributes else ''
         return {
-            'open': f'<img alt="" src="{name}" height="{height}" width="{width}"/>',
+            'open': f'<img alt="" src="{name}" {height} {width}"/>',
             'close': '',
         }
