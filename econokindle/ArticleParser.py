@@ -43,7 +43,7 @@ class ArticleParser(DocumentParser):
         if image:
             self.__images.append(image)
             image = self._key_creator.key(image)
-        if len(self.__parsed_elements) > 0 and '■' not in self.__parsed_elements:
+        if len(self.__parsed_elements) > 0 and '&#220e;' not in self.__parsed_elements:
             last_element = self.__parsed_elements.pop()
             self.__parsed_elements.append('<span>&#220e;</span>')
             self.__parsed_elements.append(last_element)
