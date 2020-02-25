@@ -27,4 +27,4 @@ jobs:
     - name: Test with pytest
       run: |
         pip install pytest
-        pytest -v --rootdir .. -s ../test.py
+        pytest -v --rootdir .. -s test.py
