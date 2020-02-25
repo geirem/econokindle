@@ -25,7 +25,8 @@ class KeyCreatorMock(KeyCreator):
 
 
 class PoolMock(urllib3.PoolManager):
-    pass
+    def request(self, method, url, **kwargs):
+        raise Exception('Method call not expected.')
 
 
 class FetcherTest(unittest.TestCase):
