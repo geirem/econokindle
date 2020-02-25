@@ -28,3 +28,8 @@ jobs:
       run: |
         pip install pytest
         pytest -v --rootdir .. -s test.py
+    - name: Create BOM
+      run: |
+        pip install cyclonedx-bom
+        cyclonedx-py
+
