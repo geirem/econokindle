@@ -3,10 +3,20 @@ name: Python application
 on: [push]
 
 jobs:
-  build:
-
+  dependencies:
     runs-on: ubuntu-latest
-
+    steps:
+    - name: Create BOM
+      run: |
+        pip install cyclonedx-bom
+        cyclonedx-py
+    - name: Upload BOM
+      env:
+        TRACK_TOKEN: ${{ secrets.TRACK_TOKEN }}
+      run: |
+        curl --data @bom.xml --header "Authorization: Bearer ${TRACK_TOKEN}" https://track.geirem.net/
+  build:
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python 3.8
@@ -28,8 +38,3 @@ jobs:
       run: |
         pip install pytest
         pytest -v --rootdir .. -s test.py
-    - name: Create BOM
-      run: |
-        pip install cyclonedx-bom
-        cyclonedx-py
-
