@@ -43,13 +43,13 @@ class ArticleParser(DocumentParser):
         if image:
             self.__images.append(image)
             image = self._key_creator.key(image)
-        if len(self.__parsed_elements) > 0 and '&#220e;' not in self.__parsed_elements:
+        if len(self.__parsed_elements) > 0 and '■' not in self.__parsed_elements:
             last_element = self.__parsed_elements.pop()
-            self.__parsed_elements.append('<span>&#220e;</span>')
+            self.__parsed_elements.append('<span>■</span>')
             self.__parsed_elements.append(last_element)
         result = {
             'title': self._apply_html_entities(self._script['headline']),
-            'text': ''.join(self.__parsed_elements),
+            'text': self._apply_html_entities(''.join(self.__parsed_elements)),
             'section': self._apply_html_entities(self._script['print']['section']['headline']),
             'subheadline': self._apply_html_entities(self._script['subheadline']),
             'description': self._apply_html_entities(self._script['description']),
@@ -68,7 +68,7 @@ class ArticleParser(DocumentParser):
 
     def __sub_parse(self, element: Any) -> None:
         if element['type'] == 'text':
-            self.__parsed_elements.append(self._apply_html_entities(element['data']))
+            self.__parsed_elements.append(element['data'])
         elif element['type'] == 'tag':
             tag = self.__parsing_strategy.get_parser(element).parse(element)
             self.__parsed_elements.append(tag['open'])
