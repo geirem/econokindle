@@ -1,3 +1,5 @@
+![Python application](https://github.com/geirem/econokindle/workflows/Python%20application/badge.svg?branch=master)
+
 # Economist Kindle Formatter.
 ## Purpose
 The purpose of this application is to read The Economist on your personal Kindle device.  It downloads the latest
