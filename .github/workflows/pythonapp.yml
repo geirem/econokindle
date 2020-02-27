@@ -3,10 +3,19 @@ name: Python application
 on: [push]
 
 jobs:
-  build:
-
+  dependencies:
     runs-on: ubuntu-latest
+    steps:
+    - name: Create BoM Python
+      run: |
+        pip install cyclonedx-bom
+        cyclonedx-py
+    - uses: geirem/bom-tracker@master
+      env:
+        TRACK_TOKEN: ${{ secrets.TRACK_TOKEN }}
 
+  build:
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python 3.8
