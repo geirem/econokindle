@@ -18,6 +18,8 @@ jobs:
     - uses: geirem/bom-tracker@master
       env:
         TRACK_TOKEN: ${{ secrets.TRACK_TOKEN }}
+        TRACK_INFO_PAGE: https://github.com/geirem/econokindle/security/advisories
+        TRACK_HOST: https://track.geirem.net
 
   build:
     runs-on: ubuntu-latest
