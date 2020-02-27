@@ -1,4 +1,4 @@
-![Python application](https://github.com/geirem/econokindle/workflows/Python%20application/badge.svg?branch=master)
+![build](https://github.com/geirem/econokindle/workflows/Python%20application/badge.svg?branch=master)
 
 # Economist Kindle Formatter.
 ## Purpose
