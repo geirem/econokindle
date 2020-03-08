@@ -1,9 +1,9 @@
 import argparse
+import asyncio
 import datetime
 import os
 import shutil
 import sqlite3
-import subprocess
 from shutil import copyfile
 
 import certifi
@@ -22,14 +22,13 @@ RESOURCES = 'resources'
 env = Environment(loader=FileSystemLoader(RESOURCES), autoescape=False)
 
 
-#NOSONAR
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-k', '--kindle_gen', help='Path to "kindlegen" binary.  Default is ~/bin/kindlegen')
     return parser.parse_args()
 
 
-def process_issue(fetcher: Fetcher, key_creator: KeyCreator, args: argparse.Namespace) -> None:
+async def process_issue(fetcher: Fetcher, key_creator: KeyCreator, args: argparse.Namespace) -> None:
     issue_url = 'https://www.economist.com/printedition'
     print(f'Processing {issue_url}...', end='')
     issue = IndexParser(fetcher.fetch_page(issue_url), key_creator).parse()
@@ -37,27 +36,36 @@ def process_issue(fetcher: Fetcher, key_creator: KeyCreator, args: argparse.Name
     with open(WORK + key_creator.key(issue['cover_image_url']), 'wb') as out:
         out.write(cover_image)
     print('done.')
-    process_articles_in_issue(fetcher, key_creator, issue)
+    await process_articles_in_issue(fetcher, key_creator, issue)
     add_section_links(issue)
     render(issue)
     copyfile(RESOURCES + '/style.css', WORK + 'style.css')
-    convert_to_mobi(Platform.kindle_gen_binary(args), WORK)
+    Platform.convert_to_mobi(args, WORK)
     Platform.load_to_kindle(WORK, issue)
 
 
-def process_articles_in_issue(fetcher: Fetcher, key_creator: KeyCreator, issue: dict) -> None:
+async def process_articles_in_issue(fetcher: Fetcher, key_creator: KeyCreator, issue: dict) -> None:
     for url in issue['urls']:
         print(f'Processing {url}...', end='')
         if url.endswith(issue['edition']):
             print('special content index, skipping.')
             continue
-        article = ArticleParser(fetcher.fetch_page(url), key_creator, issue).parse()
-        for image_url in article['images']:
-            image = fetcher.fetch_image(image_url)
-            with open(WORK + key_creator.key(image_url), 'wb') as out:
-                out.write(image)
+        article_content = fetcher.fetch_page(url)
+        article = await process_article_content(article_content, issue, key_creator)
+        fetch_article_images(article, fetcher, key_creator)
         add_article_to_issue(issue, article)
         print('done.')
+
+
+async def process_article_content(article_content, issue, key_creator):
+    return ArticleParser(article_content, key_creator, issue).parse()
+
+
+def fetch_article_images(article, fetcher, key_creator):
+    for image_url in article['images']:
+        image = fetcher.fetch_image(image_url)
+        with open(WORK + key_creator.key(image_url), 'wb') as out:
+            out.write(image)
 
 
 def add_article_to_issue(issue: dict, article: dict) -> None:
@@ -79,13 +87,8 @@ def add_section_links(issue: dict) -> None:
     while i < last_index:
         current_name = section_names[i]
         if i < last_index - 1:
-            sections[current_name]['next_pointer'] = sections[section_names[i+1]]['id']
+            sections[current_name]['next_pointer'] = sections[section_names[i + 1]]['id']
         i += 1
-
-
-#NOSONAR
-def convert_to_mobi(kindle_gen: str, path: str) -> None:
-    subprocess.call([kindle_gen, 'economist.opf'], cwd=path)
 
 
 def render(issue: dict) -> None:
@@ -115,9 +118,10 @@ def configure_dependencies() -> list:
     return [args, fetcher, key_creator]
 
 
-def main():
+async def main():
     args, fetcher, key_creator = configure_dependencies()
-    process_issue(fetcher, key_creator, args)
+    await process_issue(fetcher, key_creator, args)
 
 
-main()
+if __name__ == "__main__":
+    asyncio.run(main())
