@@ -1,6 +1,7 @@
 import argparse
 import os
 import platform
+import subprocess
 from shutil import copyfile
 
 
@@ -43,4 +44,4 @@ class Platform:
             print('Catalina is not supported, not rendering mobi.')
             return
         kindle_gen = Platform.__kindle_gen_binary(args)
-        os.subprocess.call([kindle_gen, 'economist.opf'], cwd=path)
+        subprocess.run([kindle_gen, 'economist.opf'], cwd=path)
