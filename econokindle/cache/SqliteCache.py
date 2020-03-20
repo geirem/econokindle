@@ -1,5 +1,6 @@
 from sqlite3 import Connection
 from typing import Optional, Any
+import datetime
 
 from econokindle.Cache import Cache
 from econokindle import KeyCreator
@@ -29,12 +30,16 @@ class SqliteCache(Cache):
         key = self._key_creator.key(url)
         c = self.__connection.cursor()
         if self._is_image(url):
-            c.execute('SELECT content FROM Images WHERE id = ?', [key])
+            c.execute('SELECT content, retrieved FROM Images WHERE id = ?', [key])
         else:
-            c.execute('SELECT content FROM Documents WHERE id = ?', [key])
+            c.execute('SELECT content, retrieved FROM Documents WHERE id = ?', [key])
         results = c.fetchall()
         c.close()
         if len(results) == 0:
+            return None
+        retrieved = datetime.datetime.strptime(results[0][1], '%Y-%m-%d %H:%M:%S').timestamp()
+        now = datetime.datetime.now().timestamp()
+        if retrieved + 86400 < now:
             return None
         result = results[0][0]
         return result
