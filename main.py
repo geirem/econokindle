@@ -14,7 +14,7 @@ from econokindle.ArticleParser import ArticleParser
 from econokindle.Fetcher import Fetcher
 from econokindle.IndexParser import IndexParser
 from econokindle.KeyCreator import KeyCreator
-from econokindle.Platform import Platform
+from econokindle.platform import load_to_kindle, convert_to_mobi
 from econokindle.cache.SqliteCache import SqliteCache
 
 WORK = './work/'
@@ -24,7 +24,11 @@ env = Environment(loader=FileSystemLoader(RESOURCES), autoescape=False)
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-k', '--kindle_gen', help='Path to "kindlegen" binary.  Default is ~/bin/kindlegen')
+    parser.add_argument('-k', '--kindle_gen', help='Path to "kindlegen" binary.  Defaults to ~/bin/kindlegen')
+    parser.add_argument(
+        '-c', '--calibre',
+        help='Path to "calibre" binary.  Defaults to /Applications/calibre.app/Contents/MacOS/ebook-convert'
+    )
     return parser.parse_args()
 
 
@@ -40,8 +44,8 @@ async def process_issue(fetcher: Fetcher, key_creator: KeyCreator, args: argpars
     add_section_links(issue)
     render(issue)
     copyfile(RESOURCES + '/style.css', WORK + 'style.css')
-    Platform.convert_to_mobi(args, WORK)
-    Platform.load_to_kindle(WORK, issue)
+    convert_to_mobi(args, WORK)
+    load_to_kindle(WORK, issue)
 
 
 async def process_articles_in_issue(fetcher: Fetcher, key_creator: KeyCreator, issue: dict) -> None:
