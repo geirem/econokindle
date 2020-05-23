@@ -19,8 +19,8 @@ p.article {
     margin: 0;
     padding: 0;
     text-indent: 10px;
-    orphans: 2!important;
-    widows: 3!important;
+    orphans: 2 !important;
+    widows: 3 !important;
     display: inline-block;
 }
 

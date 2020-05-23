@@ -19,16 +19,27 @@ Trademarked terms used in this application are used in good faith, according to 
 Use of the application must conform to [The Economist's terms of use](https://www.economist.com/legal/terms-of-use).
 
 ## Dependencies
-This application requires the [Kindle Gen](https://www.amazon.com/gp/feature.html?ie=UTF8&docId=1000765211) application,
-which must be downloaded and installed separately.
+This application is written in the latest version of Python, currently 3.8.  It uses no libraries not
+available on [PyPI](pypi.org/), except the converter application described below.
+
+To convert from HTML to MOBI, it requires the [KindleGen](https://www.amazon.com/gp/feature.html?ie=UTF8&docId=1000765211), or the [Calibre](https://calibre-ebook.com/)
+applications.  Either application must be dowloaded and installed separately.
+
+As KindleGen is not supported on MacOS Catalina or newer, for this platform you must use Calibre.
+
 
 ## How to Use
-The application runs under the [Pipenv](https://docs.pipenv.org/en/latest/) Python 3.7 virtual environment.  To use the
-application, install Python and Pipenv and run the `src/main/python/main.py` script.  A brief help page shows parameters
-that can be changed from their defaults.  By default, it assumes that:
-* `kindlegen` is installed in `$HOME/bin/`
-* your Kindle is mounted under `/Kindle/documents/`
-The latter default cannot be overridden yet.
+To use this application:
+* Download [EconoKindle](https://github.com/geirem/econokindle) from GitHub.
+* Install the latest version of [Python](https://www.python.org/downloads/).
+* Create a local virtual environment (recommended):
+    * `python3 -m venv .venv`
+    * `source .venv/bin/activate`
+* Install the Python dependencies from PyPI
+    * `pip3 install -r requirements.txt`
+* Install the converter application (Kindlegen or Calibre) according to the
+vendor's instructions (see above).
+* Run this application as `python3 main.py`
 
 ## Bug Reports
 Please submit bug reports or pull requests through GitHub.
