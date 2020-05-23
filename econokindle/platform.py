@@ -3,7 +3,9 @@ import os
 import platform
 import subprocess
 from shutil import copyfile
-from typing import Tuple, List, Optional, Union, Any
+from typing import Optional, List
+
+ConversionCommand = Optional[List[str]]
 
 
 def load_to_kindle(work: str, issue: dict) -> None:
@@ -25,31 +27,30 @@ def _is_windows() -> bool:
 
 
 def convert_to_mobi(args: argparse.Namespace, path: str) -> None:
-    if _is_macos():
-        processor = _calibre_binary(args)
-        subprocess.run([processor, 'economist.html', 'economist.mobi'], cwd=path)
-    elif _is_windows():
-        processor = _kindle_gen_binary(args)
-        subprocess.run([processor, 'economist.opf'], cwd=path)
+    """ Assumes that kindlegen is used on Windows, and Calibre on MacOS.  This
+        whole converter selection is a bit smelly, and should probably be heavily
+        refactored.   Some other day. """
+    processor = _kindlegen(args) if _is_windows() else _calibre(args)
     if processor is None:
-        print('No converter binary found, unable to render MOBI.')
+        print('No conversion binary found, unable to render MOBI.')
         return
-    subprocess.run(*processor, cwd=path)
+    subprocess.run(processor, cwd=path)
 
 
-def _calibre_binary(args: argparse.Namespace) -> Optional[Tuple[Union[str, Any], str, str]]:
+def _calibre(args: argparse.Namespace) -> ConversionCommand:
     binary = '/Applications/calibre.app/Contents/MacOS/ebook-convert'
     if args.calibre:
-        binary = args.calibre
-        if not os.path.isfile(binary) and not binary.endswith['/ebook-convert']:
+        binary = str(args.calibre)
+        if not os.path.isfile(binary) and not binary.endswith('/ebook-convert'):
             return None
-    return binary, 'economist.html', 'economist.mobi'
+    return [binary, 'economist.html', 'economist.mobi']
 
 
-def _kindle_gen_binary(args: argparse.Namespace) -> Optional[Tuple[Union[str, Any], str]]:
-    binary = 'C:/Program Files (x86)/kindlegen/kindlegen.exe' if _is_windows() else os.environ['HOME'] + '/bin/kindlegen'
+def _kindlegen(args: argparse.Namespace) -> ConversionCommand:
+    binary = 'C:/Program Files (x86)/kindlegen/kindlegen.exe' if _is_windows() \
+        else os.environ['HOME'] + '/bin/kindlegen'
     if args.kindle_gen:
-        binary = args.kindle_gen
-        if not os.path.isfile(binary) and not binary.endswith['/kindlegen']:
+        binary = str(args.kindle_gen)
+        if not os.path.isfile(binary) and not binary.endswith('/kindlegen'):
             return None
-    return binary, 'economist.opf'
+    return [binary, 'economist.opf']
