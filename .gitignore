@@ -12,3 +12,4 @@ __pycache__
 /lib/
 cache.db
 /venv/
+/.venv/
