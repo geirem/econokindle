@@ -7,20 +7,12 @@ from jsonpath_rw import parse
 class IndexParser(DocumentParser):
 
     def parse(self) -> dict:
-        name = ''
         cover = parse('$..cover').find(self._script).pop().value.pop()
-        canonical = parse('[*].response.canonical').find(self._script).pop().value
-        for item in canonical:
-            if item.startswith('_hasPart'):
-                name = item
-                break
-        if name == '':
-            raise Exception
+        parts = parse('props.pageProps.content.hasPart.parts').find(self._script).pop().value
+        self_url = parse('props.pageProps.pageUrl').find(self._script).pop().value
+        cover_title = parse('props.pageProps.content.headline').find(self._script).pop().value
         cover_url = cover['url']['canonical']
-        cover_title = cover['headline']
-        self_url = canonical['url']['canonical']
         edition = self_url.split('/').pop()
-        parts = canonical[name]['parts']
         urls = []
         references = []
         sections = OrderedDict()
