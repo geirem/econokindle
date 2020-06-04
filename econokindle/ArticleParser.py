@@ -27,11 +27,6 @@ class ArticleParser(DocumentParser):
             return url.pop().value
         return None
 
-    def __find_text_data(self) -> dict:
-        for item in self._script:
-            if item.startswith('_text'):
-                return self._script[item]
-
     def __start_body_parsing(self) -> None:
         for item in self._script['text']:
             self.__parse_article_body(item)
@@ -42,16 +37,17 @@ class ArticleParser(DocumentParser):
         self.__start_body_parsing()
         if image:
             self.__images.append(image)
-            image = self._key_creator.key(image)
+            image = self._key_creator.key(image).lower()
         if len(self.__parsed_elements) > 0 and '■' not in self.__parsed_elements:
             last_element = self.__parsed_elements.pop()
             self.__parsed_elements.append('<span>■</span>')
             self.__parsed_elements.append(last_element)
+        subheadline = self._apply_html_entities(self._script['subheadline']) if self._script['subheadline'] else ''
         result = {
             'title': self._apply_html_entities(self._script['headline']),
             'text': self._apply_html_entities(''.join(self.__parsed_elements)),
             'section': self._apply_html_entities(self._script['print']['section']['headline']),
-            'subheadline': self._apply_html_entities(self._script['subheadline']),
+            'subheadline': subheadline,
             'description': self._apply_html_entities(self._script['description']),
             'dateline': self._apply_html_entities(self._script['dateline']),
             'image': image,

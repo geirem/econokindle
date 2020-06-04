@@ -68,7 +68,7 @@ async def process_article_content(article_content, issue, key_creator):
 def fetch_article_images(article, fetcher, key_creator):
     for image_url in article['images']:
         image = fetcher.fetch_image(image_url)
-        with open(WORK + key_creator.key(image_url), 'wb') as out:
+        with open(WORK + key_creator.key(image_url).lower(), 'wb') as out:
             out.write(image)
 
 

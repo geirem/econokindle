@@ -6,7 +6,6 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<mbp:pagebreak/>
 {% for section_name, section in sections.items() -%}
     <a name="{{ section['id'] }}"><h1>{{ section_name }}</h1></a>
     <ul>
@@ -17,10 +16,14 @@
     {%  if 'next_pointer' in section -%}
         <a class="next_pointer" href="#{{ section['next_pointer'] }}">...next section</a>
     {% endif -%}
-    <mbp:pagebreak/>
     {% for article in section['articles'] -%}
-        <a name="{{ article['id'] }}"><h3 itemprop="alternativeHeadline">{{ article['subheadline'] }}</h3></a>
+        <div class="articleBody">
+        {% if article['subheadline']|length %}
+        <a name="{{ article['id'] }}"><h2 itemprop="alternativeHeadline">{{ article['subheadline'] }}</h2></a>
         <h1 itemprop="headline">{{ article['title'] }}</h1>
+        {% else %}
+        <a name="{{ article['id'] }}"><h1 itemprop="headline">{{ article['title'] }}</h1></a>
+        {% endif -%}
         {% if article['dateline'] -%}
             <p class="dateline"><i>{{ article['dateline'] }}</i></p>
         {% endif -%}
@@ -31,7 +34,7 @@
             <p class="description"><img src="{{ article['image'] }}" alt=""/></p>
         {% endif -%}
         <div class="article">{{ article['text'] }}</div>
-        <mbp:pagebreak/>
+        </div>
     {% endfor -%}
 {% endfor -%}
 </body>
