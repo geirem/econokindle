@@ -43,7 +43,10 @@ def _calibre(args: argparse.Namespace) -> ConversionCommand:
         binary = str(args.calibre)
         if not os.path.isfile(binary) and not binary.endswith('/ebook-convert'):
             return None
-    return [binary, 'economist.html', 'economist.mobi', '--max-toc-links=250', '--page-breaks-before=/']
+    return [
+        binary, 'economist.html', 'economist.mobi',
+        '--max-toc-links=250', '--page-breaks-before=/', '--verbose',
+    ]
 
 
 def _kindlegen(args: argparse.Namespace) -> ConversionCommand:
