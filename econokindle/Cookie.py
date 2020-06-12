@@ -4,7 +4,6 @@ from urllib.parse import urlparse
 class Cookie:
 
     def __init__(self, cookie):
-        self.__raw_cookie = cookie
         self.__properties = {}
         parts = cookie.split(';')
         self.__name, self.__value = parts.pop(0).split('=', 1)

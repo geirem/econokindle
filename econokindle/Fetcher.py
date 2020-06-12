@@ -16,7 +16,6 @@ class Fetcher:
 
     def __init__(self, pool_manager: PoolManager, key_creator: KeyCreator, cache: Cache):
         self.__pool_manager = pool_manager
-        self.__key_creator = key_creator
         self.__cache = cache
         self.__cookie_jar = CookieJar()
 
@@ -30,6 +29,7 @@ class Fetcher:
         cookie_string = response.headers.get('set-cookie')
         if cookie_string is None:
             return
+        # NOSONAR pythonsecurity:S2631
         parts = cookie_string.split(', ')
         new_cookies = []
         for p in parts:
