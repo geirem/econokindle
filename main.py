@@ -24,9 +24,12 @@ env = Environment(loader=FileSystemLoader(RESOURCES), autoescape=False)
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-k', '--kindle_gen', help='Path to "kindlegen" binary.  Defaults to ~/bin/kindlegen')
     parser.add_argument(
-        '-c', '--calibre',
+        '-k', '--kindle_gen', default='~/bin/kindle_gen',
+        help='Path to "kindlegen" binary.  Defaults to ~/bin/kindlegen'
+    )
+    parser.add_argument(
+        '-c', '--calibre', default='/Applications/calibre.app/Contents/MacOS/ebook-convert',
         help='Path to "calibre" binary.  Defaults to /Applications/calibre.app/Contents/MacOS/ebook-convert'
     )
     return parser.parse_args()

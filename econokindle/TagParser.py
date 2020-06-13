@@ -19,8 +19,6 @@ class TagParser:
 
     @staticmethod
     def _peek_at_first_child(tag: dict) -> Optional[dict]:
-        if 'children' not in tag:
-            return None
         children = tag['children']
         if len(children) == 0:
             return None

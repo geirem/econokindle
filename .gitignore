@@ -13,3 +13,5 @@ __pycache__
 cache.db
 /venv/
 /.venv/
+.coverage
+htmlcov
