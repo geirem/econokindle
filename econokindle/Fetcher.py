@@ -14,16 +14,13 @@ from econokindle.exceptions.RetrievalError import RetrievalError
 
 class Fetcher:
 
-    def __init__(self, pool_manager: PoolManager, key_creator: KeyCreator, cache: Cache):
+    def __init__(self, pool_manager: PoolManager, cache: Cache):
         self.__pool_manager = pool_manager
         self.__cache = cache
         self.__cookie_jar = CookieJar()
 
     def fetch_page(self, url: str) -> str:
-        cached = self.__cache.get(url)
-        if cached is not None:
-            return cached
-        return self.__fetch_uncached(url)
+        return self.__cache.get(url) or self.__fetch_uncached(url)
 
     def __update_cookies(self, response: HTTPResponse) -> None:
         cookie_string = response.headers.get('set-cookie')
