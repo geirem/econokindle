@@ -1,14 +1,11 @@
-import re
 import time
 from typing import Any
 
-from urllib3 import PoolManager, HTTPResponse
+from urllib3 import PoolManager
 from urllib3.exceptions import MaxRetryError
 
-from econokindle.Cookie import Cookie
-from econokindle.CookieJar import CookieJar
 from econokindle.Cache import Cache
-from econokindle.KeyCreator import KeyCreator
+from econokindle.CookieJar import CookieJar
 from econokindle.exceptions.RetrievalError import RetrievalError
 
 
@@ -22,27 +19,12 @@ class Fetcher:
     def fetch_page(self, url: str) -> str:
         return self.__cache.get(url) or self.__fetch_uncached(url)
 
-    def __update_cookies(self, response: HTTPResponse) -> None:
-        cookie_string = response.headers.get('set-cookie')
-        if cookie_string is None:
-            return
-        # NOSONAR pythonsecurity:S2631
-        parts = cookie_string.split(', ')
-        new_cookies = []
-        for p in parts:
-            if re.search('^[^ ]+=', p):
-                new_cookies.append(p)
-            else:
-                new_cookies[-1] += ', ' + p
-        for new_cookie in new_cookies:
-            self.__cookie_jar.add(Cookie(new_cookie.strip()))
-
     def __fetch_uncached(self, url: str) -> str:
         while True:
             try:
                 response = self.__execute_request(url)
                 contents = response.data.decode("utf-8")
-                if 'preloadedData' in contents or '__NEXT_DATA__' in contents:
+                if '__NEXT_DATA__' in contents:
                     self.__cache.store(url, contents)
                     return contents
             except (MaxRetryError, RetrievalError):
@@ -62,7 +44,7 @@ class Fetcher:
         if cookies != "":
             headers['Cookie'] = cookies
         response = self.__pool_manager.request("GET", url, headers=headers, preload_content=preload_content)
-        self.__update_cookies(response)
+        self.__cookie_jar.load_cookies(response)
         status = response.status
         if status != 200:
             raise RetrievalError()
