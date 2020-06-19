@@ -8,6 +8,7 @@
 <body>
 <mbp:pagebreak/>
 {% for section_name, section in sections.items() -%}
+    <mbp:pagebreak/>
     <a name="{{ section['id'] }}"><h1>{{ section_name }}</h1></a>
     <ul>
         {% for article in section['articles'] -%}
