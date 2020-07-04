@@ -48,8 +48,8 @@ class SqliteCache(Cache):
         key = self._key_creator.key(url)
         c = self.__connection.cursor()
         if self._is_image(url):
-            c.execute('INSERT INTO Images (id, url, content) VALUES (?, ?, ?)', [key, url, contents])
+            c.execute('REPLACE INTO Images (id, url, content) VALUES (?, ?, ?)', [key, url, contents])
         else:
-            c.execute('INSERT INTO Documents (id, url, content) VALUES (?, ?, ?)', [key, url, contents])
+            c.execute('REPLACE INTO Documents (id, url, content) VALUES (?, ?, ?)', [key, url, contents])
         self.__connection.commit()
         c.close()

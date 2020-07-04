@@ -40,7 +40,7 @@ async def process_issue(fetcher: Fetcher, key_creator: KeyCreator, args: argpars
     print(f'Processing {issue_url}...', end='')
     issue = IndexParser(fetcher.fetch_page(issue_url), key_creator).parse()
     cover_image = fetcher.fetch_image(issue['cover_image_url'])
-    with open(WORK + key_creator.key(issue['cover_image_url']), 'wb') as out:
+    with open(f'{WORK}cover.jpg', 'wb') as out:
         out.write(cover_image)
     print('done.')
     await process_articles_in_issue(fetcher, key_creator, issue)

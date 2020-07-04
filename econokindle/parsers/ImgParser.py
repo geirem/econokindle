@@ -11,6 +11,6 @@ class ImgParser(TagParser):
         height = f'height="{attributes["height"]}"' if 'height' in attributes else ''
         width = f'width="{attributes["width"]}"' if 'width' in attributes else ''
         return {
-            'open': f'<img alt="" src="{name.lower()}" {height} {width}"/>',
+            'open': f'<img src="{name.lower()}" {height} {width}/>',
             'close': '',
         }

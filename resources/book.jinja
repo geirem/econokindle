@@ -1,4 +1,5 @@
 <!doctype html>
+<!--suppress HtmlDeprecatedAttribute, XmlUnboundNsPrefix -->
 <html lang="en- GB">
 <head>
     <title>{{ title }}</title>
@@ -8,35 +9,34 @@
 <body>
 <mbp:pagebreak/>
 {% for section_name, section in sections.items() -%}
-    <mbp:pagebreak/>
     <a name="{{ section['id'] }}"><h1>{{ section_name }}</h1></a>
     <ul>
         {% for article in section['articles'] -%}
             <li><a class="toc" href="#{{ article['id'] }}">{{ article['title'] }}</a></li>
         {% endfor -%}
     </ul>
-    {%  if 'next_pointer' in section -%}
+    {% if 'next_pointer' in section -%}
         <a class="next_pointer" href="#{{ section['next_pointer'] }}">...next section</a>
     {% endif -%}
-    <mbp:pagebreak/>
+<mbp:pagebreak/>
     {% for article in section['articles'] -%}
         <div class="articleBody">
-        {% if article['subheadline']|length %}
-        <a name="{{ article['id'] }}"><h2 itemprop="alternativeHeadline">{{ article['subheadline'] }}</h2></a>
-        <h1 itemprop="headline">{{ article['title'] }}</h1>
-        {% else %}
-        <a name="{{ article['id'] }}"><h1 itemprop="headline">{{ article['title'] }}</h1></a>
-        {% endif -%}
-        {% if article['dateline'] -%}
-            <p class="dateline"><i>{{ article['dateline'] }}</i></p>
-        {% endif -%}
-        {% if article['description'] -%}
-            <p class="description"><i>{{ article['description'] }}</i></p>
-        {% endif -%}
-        {% if article['image'] -%}
-            <p class="description"><img src="{{ article['image'] }}" alt=""/></p>
-        {% endif -%}
-        <div class="article">{{ article['text'] }}</div>
+            {% if article['subheadline']|length %}
+                <a name="{{ article['id'] }}"><h2 itemprop="alternativeHeadline">{{ article['subheadline'] }}</h2></a>
+                <h1 itemprop="headline">{{ article['title'] }}</h1>
+            {% else %}
+                <a name="{{ article['id'] }}"><h1 itemprop="headline">{{ article['title'] }}</h1></a>
+            {% endif -%}
+            {% if article['dateline'] -%}
+                <p class="dateline"><i>{{ article['dateline'] }}</i></p>
+            {% endif -%}
+            {% if article['description'] -%}
+                <p class="description"><i>{{ article['description'] }}</i></p>
+            {% endif -%}
+            {% if article['image'] -%}
+                <p class="description"><img src="{{ article['image'] }}" alt=""/></p>
+            {% endif -%}
+            <div class="article">{{ article['text'] }}</div>
         </div>
         <mbp:pagebreak/>
     {% endfor -%}

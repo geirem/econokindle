@@ -40,7 +40,7 @@ class ArticleParser(DocumentParser):
             image = self._key_creator.key(image).lower()
         if len(self.__parsed_elements) > 0 and '■' not in self.__parsed_elements:
             last_element = self.__parsed_elements.pop()
-            self.__parsed_elements.append('<span>■</span>')
+            self.__parsed_elements.append('&nbsp;■')
             self.__parsed_elements.append(last_element)
         subheadline = self._apply_html_entities(self._script['subheadline']) if self._script['subheadline'] else ''
         result = {

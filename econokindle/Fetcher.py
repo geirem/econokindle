@@ -52,7 +52,7 @@ class Fetcher:
 
     def fetch_image(self, url: str) -> bytes:
         image = self.__cache.get(url)
-        if not image:
+        if not image or len(image) < 1024:
             image = self.__execute_request(url, False).read()
             self.__cache.store(url, image)
         return image
