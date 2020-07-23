@@ -1,3 +1,4 @@
+import logging
 import time
 from typing import Any
 
@@ -7,6 +8,8 @@ from urllib3.exceptions import MaxRetryError
 from econokindle.Cache import Cache
 from econokindle.CookieJar import CookieJar
 from econokindle.exceptions.RetrievalError import RetrievalError
+
+_log = logging.getLogger(__name__)
 
 
 class Fetcher:
@@ -53,6 +56,11 @@ class Fetcher:
     def fetch_image(self, url: str) -> bytes:
         image = self.__cache.get(url)
         if not image or len(image) < 1024:
-            image = self.__execute_request(url, False).read()
+            try:
+                image = self.__execute_request(url, False).read()
+            except RetrievalError:
+                _log.warning(f"Unable to fetch image {url}, using default.")
+                with open('resources/default.png', 'rb') as inimage:
+                    image = inimage.read()
             self.__cache.store(url, image)
         return image
