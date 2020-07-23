@@ -45,7 +45,8 @@ def _calibre(args: argparse.Namespace) -> ConversionCommand:
             return None
     return [
         binary, 'economist.html', 'economist.mobi',
-        '--max-toc-links=250', '--page-breaks-before=/', '--verbose',
+        '--max-toc-links=250', '--page-breaks-before=/', '--verbose', '--disable-markup-chapter-headings',
+        '--chapter=/', '--prefer-metadata-cover',
         '--no-chapters-in-toc', '--cover=cover.jpg', '--authors=Economist',
     ]
 
