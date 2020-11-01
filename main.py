@@ -6,16 +6,15 @@ import shutil
 import sqlite3
 from shutil import copyfile
 
-import certifi
-import urllib3
+import requests
 from jinja2 import Environment, FileSystemLoader
 
 from econokindle.ArticleParser import ArticleParser
 from econokindle.Fetcher import Fetcher
 from econokindle.IndexParser import IndexParser
 from econokindle.KeyCreator import KeyCreator
-from econokindle.platform import load_to_kindle, convert_to_mobi
 from econokindle.cache.SqliteCache import SqliteCache
+from econokindle.platform import load_to_kindle, convert_to_mobi
 
 WORK = './work/'
 RESOURCES = 'resources'
@@ -117,11 +116,11 @@ def configure_dependencies() -> list:
         shutil.rmtree(WORK)
     os.makedirs(WORK)
     args = parse_args()
-    pool_manager = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
     key_creator = KeyCreator(str(datetime.date.today()))
     conn = sqlite3.connect('cache.db')
     cache = SqliteCache(conn, key_creator)
-    fetcher = Fetcher(pool_manager, cache)
+    session = requests.session()
+    fetcher = Fetcher(session, cache)
     return [args, fetcher, key_creator]
 
 
