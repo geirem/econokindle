@@ -13,7 +13,7 @@ class Fetcher:
 
     def __init__(self, session: Session, cache: Cache) -> None:
         self._session = session
-        self._session.headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; rv:68.0) Gecko/20100101 Firefox/68.0'
+        self._session.headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; rv:68.0) Gecko/20100101 Firefox/83.0'
         self.__cache = cache
 
     def fetch_page(self, url: str) -> str:
