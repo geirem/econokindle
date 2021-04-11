@@ -28,11 +28,13 @@ class ArticleParser(DocumentParser):
         return None
 
     def __start_body_parsing(self) -> None:
-        for item in self._script['text']:
+        for item in self._script['props']['pageProps']['content'][0]['text']:
             self.__parse_article_body(item)
 
     def parse(self) -> dict:
-        article_id = self._key_creator.key(self._script['url']['canonical'])
+        page_props = self._script['props']['pageProps']
+        content = page_props['content'][0]
+        article_id = self._key_creator.key(page_props['pageUrl'])
         image = self.__extract_main_image()
         self.__start_body_parsing()
         if image:
@@ -42,14 +44,14 @@ class ArticleParser(DocumentParser):
             last_element = self.__parsed_elements.pop()
             self.__parsed_elements.append('&nbsp;■')
             self.__parsed_elements.append(last_element)
-        subheadline = self._apply_html_entities(self._script['subheadline']) if self._script['subheadline'] else ''
+        subheadline = self._apply_html_entities(content.get('subheadline', ''))
         result = {
-            'title': self._apply_html_entities(self._script['headline']),
+            'title': self._apply_html_entities(content['headline']),
             'text': self._apply_html_entities(''.join(self.__parsed_elements)),
-            'section': self._apply_html_entities(self._script['print']['section']['headline']),
+            'section': self._apply_html_entities(content['print']['section']['headline']),
             'subheadline': subheadline,
-            'description': self._apply_html_entities(self._script['description']),
-            'dateline': self._apply_html_entities(self._script['dateline']),
+            'description': self._apply_html_entities(content['description']),
+            'dateline': self._apply_html_entities(content['dateline']),
             'image': image,
             'images': self.__images,
             'id': article_id,

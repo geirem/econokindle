@@ -18,10 +18,6 @@ def load_to_kindle(work: str, issue: dict) -> None:
         copyfile(cached_edition_name, target_name)
 
 
-def _is_macos() -> bool:
-    return platform.system() == 'Darwin'
-
-
 def _is_windows() -> bool:
     return platform.system() == 'Windows'
 

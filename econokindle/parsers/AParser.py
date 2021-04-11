@@ -5,8 +5,6 @@ class AParser(TagParser):
 
     def parse(self, item: dict) -> dict:
         attributes = item['attribs']
-        if 'href' not in attributes:
-            return super().parse(item)
         href = self._key_creator.key(attributes['href'])
         # Hack to support references to articles in other issues.
         tag = { 'close': '</a>'}
