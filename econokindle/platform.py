@@ -14,6 +14,7 @@ def load_to_kindle(work: str, issue: dict) -> None:
     root = 'D:/documents/' if _is_windows() else '/Volumes/Kindle/documents/'
     target_name = root + issue['edition'] + '_economist.mobi'
     os.rename(cached_name, cached_edition_name)
+    print("File renamed to: " + cached_edition_name)
     if os.path.isdir(root):
         copyfile(cached_edition_name, target_name)
 
@@ -26,11 +27,22 @@ def convert_to_mobi(args: argparse.Namespace, path: str) -> None:
     """ Assumes that kindlegen is used on Windows, and Calibre on MacOS.  This
         whole converter selection is a bit smelly, and should probably be heavily
         refactored.   Some other day. """
-    processor = _kindlegen(args) if _is_windows() else _calibre(args)
+    processor = None
+    if str(args.mobi_converter) == "system_default":
+        processor = _kindlegen(args) if _is_windows() else _calibre(args)
+    elif str(args.mobi_converter) == "calibre":
+        processor = _calibre(args)
+    elif str(args.mobi_converter) == "kindlegen":
+        processor = _kindlegen(args)
     if processor is None:
-        print('No conversion binary found, unable to render MOBI.')
-        return
-    subprocess.run(processor, cwd=path)
+        raise Exception('No conversion binary found, unable to render MOBI.')
+    completed_process = subprocess.run(processor, cwd=path)
+    conversion_exception_str = "Conversion from html/opf file to mobi file failed. Do you have a converter app" \
+                               " like Calibre or KindleGen installed as per the README?"
+    if completed_process.returncode != 0:
+        raise Exception(conversion_exception_str)
+    if not os.path.isfile(os.path.join(path, 'economist.mobi')):
+        raise Exception("Output file not found. " + conversion_exception_str)
 
 
 def _calibre(args: argparse.Namespace) -> ConversionCommand:

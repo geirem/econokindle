@@ -31,6 +31,14 @@ def parse_args():
         '-c', '--calibre', default='/Applications/calibre.app/Contents/MacOS/ebook-convert',
         help='Path to "calibre" binary.  Defaults to /Applications/calibre.app/Contents/MacOS/ebook-convert'
     )
+    parser.add_argument(
+        '-m', '--mobi_converter', default='system_default',
+        choices=['kindlegen', 'calibre', 'system_default'],
+        help='Converter application to use to convert the html file into a MOBI file. The application to use must be pre-installed on your computer.'
+             ' Options are "kindlegen" which will use Amazon KindleGen, '
+             '"calibre" which will use the open source Calibre application, '
+             'or "system_default" which will use kindlegen when on windows, and calibre when on Mac.'
+    )
     return parser.parse_args()
 
 
