@@ -9,8 +9,8 @@ ConversionCommand = Optional[List[str]]
 
 
 def load_to_kindle(work: str, issue: dict) -> None:
-    cached_name = work + 'economist.mobi'
-    cached_edition_name = work + issue['edition'] + '_economist.mobi'
+    cached_name = os.path.join(work, 'economist.mobi')
+    cached_edition_name = os.path.join(work, issue['edition'] + '_economist.mobi')
     root = 'D:/documents/' if _is_windows() else '/Volumes/Kindle/documents/'
     target_name = root + issue['edition'] + '_economist.mobi'
     os.rename(cached_name, cached_edition_name)

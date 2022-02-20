@@ -1,6 +1,6 @@
 import logging
 import time
-
+import os
 from requests import Session
 
 from econokindle.Cache import Cache
@@ -42,7 +42,9 @@ class Fetcher:
                 image = response.content
             else:
                 _log.warning(f"Unable to fetch image {url}, using default.")
-                with open('resources/default.png', 'rb') as inimage:
+                fetcher_location = os.path.dirname(os.path.abspath(__file__))
+                default_img_path = os.path.join(fetcher_location, "..", "resources", "default.png")
+                with open(default_img_path, 'rb') as inimage:
                     image = inimage.read()
             self.__cache.store(url, image)
         return image

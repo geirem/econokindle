@@ -41,6 +41,9 @@ To use this application:
 vendor's instructions (see above). Note that when running this package
  on Windows the default converter application is Kindlegen, which can be changed via a command line argument to Calibre (see below).
 * Run this application as `python3 main.py` or `python main.py --calibre "C:\Program Files (x86)\Calibre2\ebook-convert.exe" --mobi_converter calibre` if you wish to specify the path to the calibre install location and force to use calibre (for example, on windows to overwrite the default).
+    * To use the functionality that auto sends an email to your kindle, `D:\my_user\git\econokindle\venv\Scripts\python.exe D:\my_user\git\econokindle\main.py --calibre "C:\Program Files (x86)\Calibre2\ebook-convert.exe" --mobi_converter calibre --to_email fake_email@kindle.com --from_email fake_email@gmail.com --password_email fake_pass --send_email true`
+    * Note that the from email if using gmail needs an app specific password enabled, and the from email needs to be added to the approved list of senders to the kindle, and the to email must be your unique kindle email address.
+    * This can also be scheduled, for instance from TaskScheduler on Windows.
 
 ## Bug Reports
 Please submit bug reports or pull requests through GitHub.
