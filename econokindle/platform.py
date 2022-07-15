@@ -9,10 +9,10 @@ ConversionCommand = Optional[List[str]]
 
 
 def load_to_kindle(work: str, issue: dict) -> None:
-    cached_name = os.path.join(work, 'economist.mobi')
-    cached_edition_name = os.path.join(work, issue['edition'] + '_economist.mobi')
+    cached_name = os.path.join(work, 'economist.epub')
+    cached_edition_name = os.path.join(work, issue['edition'] + '_economist.epub')
     root = 'D:/documents/' if _is_windows() else '/Volumes/Kindle/documents/'
-    target_name = root + issue['edition'] + '_economist.mobi'
+    target_name = root + issue['edition'] + '_economist.epub'
     os.rename(cached_name, cached_edition_name)
     print("File renamed to: " + cached_edition_name)
     if os.path.isdir(root):
@@ -23,7 +23,7 @@ def _is_windows() -> bool:
     return platform.system() == 'Windows'
 
 
-def convert_to_mobi(args: argparse.Namespace, path: str) -> None:
+def convert_to_epub(args: argparse.Namespace, path: str) -> None:
     """ Assumes that kindlegen is used on Windows, and Calibre on MacOS.  This
         whole converter selection is a bit smelly, and should probably be heavily
         refactored.   Some other day. """
@@ -41,7 +41,7 @@ def convert_to_mobi(args: argparse.Namespace, path: str) -> None:
                                " like Calibre or KindleGen installed as per the README?"
     if completed_process.returncode != 0:
         raise Exception(conversion_exception_str)
-    if not os.path.isfile(os.path.join(path, 'economist.mobi')):
+    if not os.path.isfile(os.path.join(path, 'economist.epub')):
         raise Exception("Output file not found. " + conversion_exception_str)
 
 
@@ -52,7 +52,7 @@ def _calibre(args: argparse.Namespace) -> ConversionCommand:
         if not os.path.isfile(binary) and not binary.endswith('/ebook-convert'):
             return None
     return [
-        binary, 'economist.html', 'economist.mobi',
+        binary, 'economist.html', 'economist.epub',
         '--max-toc-links=250', '--page-breaks-before=/', '--verbose', '--disable-markup-chapter-headings',
         '--chapter=/', '--prefer-metadata-cover',
         '--no-chapters-in-toc', '--cover=cover.jpg', '--authors=Economist',

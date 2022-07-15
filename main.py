@@ -14,7 +14,7 @@ from econokindle.Fetcher import Fetcher
 from econokindle.IndexParser import IndexParser
 from econokindle.KeyCreator import KeyCreator
 from econokindle.cache.SqliteCache import SqliteCache
-from econokindle.platform import load_to_kindle, convert_to_mobi
+from econokindle.platform import load_to_kindle, convert_to_epub
 from econokindle.EmailKindle import send_mail
 
 MAIN_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -96,13 +96,13 @@ async def process_issue(fetcher: Fetcher, key_creator: KeyCreator, args: argpars
     render(issue)
     copyfile(os.path.join(RESOURCES, 'style.css'), os.path.join(WORK, 'style.css'))
     _logger.info("converting to mobi")
-    convert_to_mobi(args, WORK)
+    convert_to_epub(args, WORK)
     load_to_kindle(WORK, issue)
     if args.send_email:
         _logger.info("sending email")
         send_mail(args.from_email, args.password_email, [args.to_email],
                   "economist weekly edition", "heres the weekly edition",
-                  files=[os.path.join(WORK, issue['edition'] + '_economist.mobi')])
+                  files=[os.path.join(WORK, issue['edition'] + '_economist.epub')])
     _logger.info("done")
 
 async def process_articles_in_issue(fetcher: Fetcher, key_creator: KeyCreator, issue: dict) -> None:

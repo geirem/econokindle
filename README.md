@@ -22,8 +22,8 @@ Use of the application must conform to [The Economist's terms of use](https://ww
 This application is written in the latest version of Python, currently 3.8.  It uses no libraries not
 available on [PyPI](pypi.org/), except the converter application described below.
 
-To convert from HTML to MOBI, it requires the [KindleGen](https://www.amazon.com/gp/feature.html?ie=UTF8&docId=1000765211), or the [Calibre](https://calibre-ebook.com/)
-applications.  Either application must be dowloaded and installed separately. Since writing this package KindleGen is no longer supported (2022-01-06), so use Calibre.
+This application was originally built to convert from HTML to MOBI, it requires the [KindleGen](https://www.amazon.com/gp/feature.html?ie=UTF8&docId=1000765211), or the [Calibre](https://calibre-ebook.com/)
+applications.  Either application must be dowloaded and installed separately. Since writing this package KindleGen is no longer supported (2022-01-06), so use Calibre. Also since writing Amazon announced they will no longer support .mobi, but will add support for epubs.
 
 As KindleGen is not supported on MacOS Catalina or newer, for this platform you must use Calibre.
 
